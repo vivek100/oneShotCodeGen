@@ -5,18 +5,22 @@ A command-line tool that generates complete full stack web applications from a s
 ## Purpose
 
 ### Problem
-When creating full-stack web applications from scratch using AI models like ChatGPT/Claude/Cursor several challenges arise:
-- Models make a lot of assumptions about implementation details
+ AI models like ChatGPT/Claude/Cursor struggle to create accurate fullstack webapp from scracth. They are not bad at coding but get confused due to following reasons:-
+ 
+- **Models make a lot of assumptions about implementation details which are lost in the black box**
+  
   - It assumes details like user flows,screen, technologies etc which are not documented and lost in its decision making process, leading to inaccurate cpde
   - When you prompt the model to build on top of its previous output, it just makes new assumptions leading to inaccuracies across old and new code
   - When you ask it change anything, it doesn't have the relevant context and creates code by filling up the gaps
-- As the changes become complex over the chat window
+    
+- **As the changes become complex over the chat window it struggles with what to refer to and what not**
+  
   - the Code quality drops rapidly as the model needs a lot of hand holding in what past context to take in and what not
   - Changes aren't properly tracked or incorporated across components
   - No clear separation between requirements and implementation
 
 ### Solution
-We try to solve this problems by divide the code generation process into distinct steps/phases, where the AI is forced to document all of its assumptions and details, which is later passed on as context to make further accurate changes.
+We try to solve this problems by dividing the code generation process into distinct steps/phases. We force the AI to document all of its assumptions and details, we also pass the output of previous steps as context to generate the next LLM response. All of this is saved and can be later passed on as context to make further accurate changes.
 
 You just give it a simple prompt like "Create an expense management tool" and it will setup the whole project with relevant code and requirement docs. We explain the chart below on how it takes user prompt and creates the app:
 
@@ -55,7 +59,7 @@ style E fill:#ffedcc,stroke:#000,stroke-width:2px,color:#000
 style K fill:#99c2a2,stroke:#000,stroke-width:2px,color:#000
 
 ```
-Each phase uses specialized prompts that focus on specific aspects of the application to ensure the best output is generated
+Each phase uses specialized prompts that focus on specific aspects of the application to ensure the best output is generated.\n
 We also have different versions of prompt for you to try out and see which leads to highest accuracy code.
 
 ### How to make the most of this tool
