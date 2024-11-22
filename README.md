@@ -1,18 +1,24 @@
 # AI Code Generator CLI v2
 
-A command-line tool that generates complete web applications from natural language descriptions using AI. This version supports multiple prompt versions and flexible code generation strategies.
+A command-line tool that generates complete full stack web applications from a single prompt using AI.
 
 ## Purpose
 
 ### Problem
-When creating full-stack web applications using AI models like ChatGPT, several challenges arise:
-- Models make inconsistent assumptions about implementation details
-- Code quality degrades as conversation context grows
-- Changes aren't properly tracked or incorporated across components
-- No clear separation between requirements and implementation
+When creating full-stack web applications from scratch using AI models like ChatGPT/Claude/Cursor several challenges arise:
+- Models make a lot of assumptions about implementation details
+  - It assumes details like user flows,screen, technologies etc which are not documented and lost in its decision making process, leading to inaccurate cpde
+  - When you prompt the model to build on top of its previous output, it just makes new assumptions leading to inaccuracies across old and new code
+  - When you ask it change anything, it doesn't have the relevant context and creates code by filling up the gaps
+- As the changes become complex over the chat window
+  - the Code quality drops rapidly as the model needs a lot of hand holding in what past context to take in and what not
+  - Changes aren't properly tracked or incorporated across components
+  - No clear separation between requirements and implementation
 
 ### Solution
-This tool addresses these challenges by breaking down the application generation process into distinct phases, each building upon the previous one:
+We try to solve this problems by divide the code generation process into distinct steps/phases, where the AI is forced to document all of its assumptions and details, which is later passed on as context to make further accurate changes.
+
+You just give it a simple prompt like "Create an expense management tool" and it will setup the whole project with relevant code and requirement docs. We explain the chart below on how it takes user prompt and creates the app:
 
 ```mermaid
 graph TD
@@ -49,24 +55,25 @@ style E fill:#ffedcc,stroke:#000,stroke-width:2px,color:#000
 style K fill:#99c2a2,stroke:#000,stroke-width:2px,color:#000
 
 ```
-Each phase uses specialized prompts that focus on specific aspects of the application.
-You just ask it "create a todo app" and it will generate the requirements, technical specs, and code for the todo app and save in a folder. 
+Each phase uses specialized prompts that focus on specific aspects of the application to ensure the best output is generated
+We also have different versions of prompt for you to try out and see which leads to highest accuracy code.
 
 ### How to make the most of this tool
-1. Full code mode: The tool generates functional requirements , technical implementation details, database, backend code, and frontend code. Then creates the project files in a folder and installs all the dependencies. 
+1. Full code mode: Generates functional requirements doc, technical implementation doc, database setup, backend code and frontend code. It then creates the project files in a folder and installs all the dependencies. You just need to start the backend and frontend server with "npm start"
 Which then you can open in an ai code editor like cursor to edit further.Because all the assumptions doen via ai is present in the folder cursor has all all the context and you actually work on minor changes or change the requirements and ask cursor to make the changes.
 2. Code only mode: You can generate the requirements and code in the same folder, but doesnt create the project files and installs the dependencies. 
 Then open in an ai code editor like cursor and ask it read all the files and refine it and generate the code again.
 3. Requirements only mode: You can generate the functional requirements and technical implementation details in a separate folder. Open in an ai code editor like cursor and based on the og requirements or your changes you can ask it to write the code.
+4. Changing the tech stack: You can edit the prompts to change what tech stack you want for your application, currently all apps are created in react frontend, sqlite for DB and nodejs/express for backend
 
-## We have three verions of specialized prompts for each phase to test which one works best:
+## We have different approaches using which you can generate accurate output for each phase to test which one works best for you:
 
 ### Functional Requirements Phase
 | Version | Description | How it Works |
 |---------|-------------|--------------|
-| v1 | Component-Focused Analysis | Creates detailed requirements with component hierarchies, flowcharts, and UI/UX specifications, focusing on system structure |
-| v2 | User Journey-Driven Analysis | Generates narrative-style requirements focusing on user journeys and interactions through the system |
-| v3 | Use Case-Driven Analysis | Produces detailed use case descriptions with actors, preconditions, flows, and postconditions |
+| v1 | Component-Focused  | Creates detailed requirements with component hierarchies, flowcharts, and UI/UX specifications, focusing on system structure |
+| v2 | User Journey-Driven  | Generates narrative-style requirements focusing on user journeys and interactions through the system |
+| v3 | Use Case-Driven  | Produces detailed use case descriptions with actors, preconditions, flows, and postconditions |
 
 ### Technical Requirements Phase
 | Version | Description | How it Works |
@@ -84,23 +91,25 @@ Then open in an ai code editor like cursor and ask it read all the files and ref
 
 This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process. Allowing user to pick and choose which combination works the best for their requirements.
 
+NOTE: I am currently testing them all and will release a table highlighting the performace of each version, maybe modify the top ones to get higher accuracy.
+
 ## Features
 
 - Multiple prompt versions for requirements and code generation
-- Support for both OpenAI and Anthropic models
+- Support for both OpenAI and Anthropic models(Currently Claude as an API limit of 1024 tokens so might not be useful)
 - Flexible code generation strategies:
   - Combined API (DB + Backend) and Frontend (v1)
   - Separate Database, Backend, and Frontend (v2)
-  - Custom combinations (v3)
+  - Custom Templates (v3), here we can pass code templates to the AI to create accurate code, the templates for backend and frontend are presnet in "/templates" folder
 - Rich console output with progress tracking
-- Organized project structure with documentation
+- Organized project structure with documentation, all files are created in a seperate folder called "/generated_project"
 
 ## Installation
 
 1. Clone the repository: 
    ```bash
-   git clone https://github.com/yourusername/ai-code-generator-cli-v2.git
-   cd ai-code-generator-cli-v2
+   git clone https://github.com/vivek100/oneShotCodeGen.git
+   cd oneShotCodeGen
    ```
 
 2. Create a virtual environment:
@@ -176,9 +185,9 @@ The tool provides various options for customization:
 - `--backend-template`: Path to backend code template file (for v3 only)
 - `--frontend-template`: Path to frontend code template file (for v3 only)
 
-## Project Structure
+## Output Project Structure
 
-Generated projects follow a consistent structure:
+All code and llm outputs are saved in generated projects follow a consistent structure:
 
 generated_projects/
 └── project_YYYYMMDD_HHMMSS_uniqueid/
