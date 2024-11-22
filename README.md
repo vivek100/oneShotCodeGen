@@ -188,15 +188,22 @@ All code and llm outputs are saved in generated projects follow a consistent str
 ```
 generated_projects/
 └── project_YYYYMMDD_HHMMSS_uniqueid/
-├── docs/
-│ ├── functional_requirements.md
-│ └── technical_requirements.md
-├── generatedCode/
-│ ├── backend/
-│ │ └── output.txt
-│ └── frontend/
-│ └── output.txt
-└── project_summary.md
+    ├── docs/
+    │   ├── functional_requirements.md
+    │   └── technical_requirements.md
+    ├── generatedCode/
+    │   ├── backend/
+    │   │   └── (All backend code for API and DB)
+    │   └── frontend/
+    │       └── (All frontend code)
+    ├── project_summary.md
+    └── outputCode/
+        ├── backend/
+        │   └── output.txt
+        └── db/(If we are generating db code seperately)
+        |   └── output.txt
+        └── frontend/
+            └── output.txt
 ```
 
 

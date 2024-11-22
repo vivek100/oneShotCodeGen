@@ -67,7 +67,7 @@ class CodeGenerator:
         
         # Create standard directory structure
         docs_dir = os.path.join(project_dir, "docs")
-        code_output_dir = os.path.join(project_dir, "code")  # For LLM outputs
+        code_output_dir = os.path.join(project_dir, "outputCode")  # For LLM outputs
         generated_code_dir = os.path.join(project_dir, "generatedCode")  # For actual code files
         
         os.makedirs(docs_dir, exist_ok=True)
