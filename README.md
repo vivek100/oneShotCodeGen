@@ -15,23 +15,24 @@ When creating full-stack web applications using AI models like ChatGPT, several 
 This tool addresses these challenges by breaking down the application generation process into distinct phases, each building upon the previous one:
 
 ```mermaid
-graph TD
+graph LR
 subgraph Phase 1
 A[User Prompt] -->|Functional Requirements Prompt| B[Functional Requirements]
 end
 subgraph Phase 2
 B -->|Technical Requirements Prompt| C[Technical Requirements]
-B --> D[Database/Backend Code]
+B -->|Database Generation Prompt| D[Database/Backend Code]
+C -->|Backend Generation Prompt| D
 end
 subgraph Phase 3
-C --> E[Frontend Code]
-D --> E
+C -->|Frontend Generation Prompt| E[Frontend Code]
+D -->|API Integration Prompt| E
 end
-style A fill:#ffcc99,stroke:#333,stroke-width:2px
-style B fill:#ffcc99,stroke:#333,stroke-width:2px
-style C fill:#ffcc99,stroke:#333,stroke-width:2px
-style D fill:#ffcc99,stroke:#333,stroke-width:2px
-style E fill:#ffcc99,stroke:#333,stroke-width:2px
+style A fill:#ffedcc,stroke:#000,stroke-width:2px
+style B fill:#ffedcc,stroke:#000,stroke-width:2px
+style C fill:#ffedcc,stroke:#000,stroke-width:2px
+style D fill:#ffedcc,stroke:#000,stroke-width:2px
+style E fill:#ffedcc,stroke:#000,stroke-width:2px
 ```
 Each phase uses specialized prompts that focus on specific aspects of the application.
 You just ask it "create a todo app" and it will generate the requirements, technical specs, and code for the todo app and save in a folder. 
