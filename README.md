@@ -238,7 +238,7 @@ generated_projects/
 
 
 ### Functional Requirements Phase
-| Version | Description | How it Works |
+| Version | Description | What does this prompt version do |
 |---------|-------------|--------------|
 | v1 | Component-Focused  | Creates detailed requirements with UI web component hierarchies, flowcharts, and UI/UX specifications, focusing on system structure |
 | v2 | User Journey-Driven  | Generates narrative-style requirements main focus on user journeys and interactions through the system |
@@ -246,7 +246,7 @@ generated_projects/
 
 
 ### Technical Requirements Phase
-| Version | Description | How it Works |
+| Version | Description | What does this prompt version do |
 |---------|-------------|--------------|
 | v1 | Full System Architecture | Generates comprehensive technical specs including system diagrams, data models, and component interactions |
 | v2 | API-First Design | Creates technical documentation focusing on API endpoints, data flow, and service interfaces |
@@ -254,7 +254,7 @@ generated_projects/
 
 
 ### Code Generation Phase
-| Version | Description | How it Works |
+| Version | Description | What does this prompt version do |
 |---------|-------------|--------------|
 | v1 | Three-Layer Generation | Separately generates database, API, and frontend code with clear boundaries between layers |
 | v2 | Combined Backend Generation | Creates integrated backend (DB + API) first, then generates frontend to match the API |
