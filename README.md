@@ -145,7 +145,7 @@ The tool provides various options for customization:
   ```bash
   python -m ai_code_generator_cli.cli "Create a todo app" \
   --mode full \
-  --func-version v2 \
+  --func-version v1 \
   --tech-version v1 \
   --code-version v3 \
   --backend-template templates/backend.txt \
