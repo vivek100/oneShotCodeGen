@@ -64,30 +64,26 @@ Then open in an ai code editor like cursor and ask it read all the files and ref
 ### Functional Requirements Phase
 | Version | Description | How it Works |
 |---------|-------------|--------------|
-| **v1** | Separate DB, Backend, and Frontend | Creates detailed requirements with component hierarchies and flowcharts, focusing on UI/UX and user flows |
-| **v2** | Combined API (DB + Backend) and Frontend | Generates integrated requirements with user journeys and narrative descriptions |
-| **v3** | Custom combinations with templates | Produces use-case driven requirements with detailed actor interactions and system behaviors |
+| v1 | Component-Focused Analysis | Creates detailed requirements with component hierarchies, flowcharts, and UI/UX specifications, focusing on system structure |
+| v2 | User Journey-Driven Analysis | Generates narrative-style requirements focusing on user journeys and interactions through the system |
+| v3 | Use Case-Driven Analysis | Produces detailed use case descriptions with actors, preconditions, flows, and postconditions |
 
 ### Technical Requirements Phase
 | Version | Description | How it Works |
 |---------|-------------|--------------|
-| **v1** | Separate DB, Backend, and Frontend | Generates comprehensive technical specs with system architecture, data models, and API endpoints |
-| **v2** | Combined API (DB + Backend) and Frontend | Creates unified technical documentation focusing on API-first design |
-| **v3** | Custom combinations with templates | Produces OpenAPI/Swagger specifications with detailed component interactions |
+| v1 | Full System Architecture | Generates comprehensive technical specs including system diagrams, data models, and component interactions |
+| v2 | API-First Design | Creates technical documentation focusing on API endpoints, data flow, and service interfaces |
+| v3 | OpenAPI/Swagger Approach | Produces detailed API specifications in OpenAPI format with schemas, endpoints, and authentication flows |
 
 ### Code Generation Phase
 | Version | Description | How it Works |
 |---------|-------------|--------------|
-| **v1** | Separate DB, Backend, and Frontend | Generates independent code modules using specialized prompts for each layer |
-| **v2** | Combined API (DB + Backend) and Frontend | Creates integrated backend code first, then frontend code that aligns with the API |
-| **v3** | Custom combinations with templates | Uses provided templates to ensure consistent code structure and patterns |
+| v1 | Three-Layer Generation | Separately generates database, API, and frontend code with clear boundaries between layers |
+| v2 | Combined Backend Generation | Creates integrated backend (DB + API) first, then generates frontend to match the API |
+| v3 | Template-Driven Generation | Uses provided templates to ensure consistent code structure across all components |
 
-This structured approach ensures:
-- Clear separation of concerns
-- Consistent implementation details
-- Traceable requirements to code
-- Maintainable code quality
-- Reusable patterns and templates
+This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process.
+
 ## Features
 
 - Multiple prompt versions for requirements and code generation
