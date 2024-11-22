@@ -133,7 +133,7 @@ ANTHROPIC_API_KEY=your_anthropic_key
 
 
 The tool provides various options for customization:
-
+> make sure you have python, node, npm installed in your system and added to PATH variables
 
 - Basic usage with default versions:
   ```bash
