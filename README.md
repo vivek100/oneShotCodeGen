@@ -148,8 +148,8 @@ The tool provides various options for customization:
   --func-version v1 \
   --tech-version v1 \
   --code-version v3 \
-  --backend-template templates/backend.txt \
-  --frontend-template templates/frontend.txt
+  --backend-template templates/backend.txt \ (needed when code version is v3)
+  --frontend-template templates/frontend.txt \ (needed when code version is v3)
   ```
 
 
@@ -176,8 +176,8 @@ The tool provides various options for customization:
 - `--tech-version`: Version of technical requirements prompt (v1/v2/v3)
 - `--code-version`: Version of code generation prompts (v1/v2/v3)
 - `--model`: AI model provider (openai/anthropic)
-- `--backend-template`: Path to backend code template file (for v3 only)
-- `--frontend-template`: Path to frontend code template file (for v3 only)
+- `--backend-template`: Path to backend code template file (needed for code version v3 only)
+- `--frontend-template`: Path to frontend code template file (needed for code version v3 only)
 
 
 ## Output Project Structure
