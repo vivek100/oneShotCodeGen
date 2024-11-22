@@ -4,15 +4,70 @@ A command-line tool that generates complete web applications from natural langua
 
 ## Purpose
 
-The purpose of this repository is to provide a seamless way to create fully functional full-stack web applications in one go. By dividing the user prompt into multiple steps, the tool can generate all necessary components, including:
+### Problem
+When creating full-stack web applications using AI models like ChatGPT, several challenges arise:
+- Models make inconsistent assumptions about implementation details
+- Code quality degrades as conversation context grows
+- Changes aren't properly tracked or incorporated across components
+- No clear separation between requirements and implementation
 
-- **Functional Requirements**: Captures what the application should do.
-- **Technical Requirements**: Defines how the application will be built.
-- **Backend Code**: Generates the server-side logic and database interactions.
-- **Frontend Code**: Creates the user interface and client-side logic.
+### Solution
+This tool addresses these challenges by breaking down the application generation process into distinct phases, each building upon the previous one:
 
-This structured approach allows users to specify their needs in a natural language format, and the tool translates these requirements into a complete application setup.
+```mermaid
+graph TD
+A[User Prompt] --> B[Functional Requirements]
+B --> C[Technical Requirements]
+C --> D[Database/Backend Code]
+B --> D
+D --> E[Frontend Code]
+B --> E
+C --> E
+style A fill:#f9f,stroke:#333
+style B fill:#bbf,stroke:#333
+style C fill:#bfb,stroke:#333
+style D fill:#fbb,stroke:#333
+style E fill:#fbf,stroke:#333
+```
+Each phase uses specialized prompts that focus on specific aspects of the application.
+You just ask it "create a todo app" and it will generate the requirements, technical specs, and code for the todo app and save in a folder. 
 
+### How to make the most of this tool
+1. Full code mode: The tool generates functional requirements , technical implementation details, database, backend code, and frontend code. Then creates the project files in a folder and installs all the dependencies. 
+Which then you can open in an ai code editor like cursor to edit further.Because all the assumptions doen via ai is present in the folder cursor has all all the context and you actually work on minor changes or change the requirements and ask cursor to make the changes.
+2. Code only mode: You can generate the requirements and code in the same folder, but doesnt create the project files and installs the dependencies. 
+Then open in an ai code editor like cursor and ask it read all the files and refine it and generate the code again.
+3. Requirements only mode: You can generate the functional requirements and technical implementation details in a separate folder. Open in an ai code editor like cursor and based on the og requirements or your changes you can ask it to write the code.
+
+##We have three verions of specialized prompts for each phase to test which one works best:
+
+### Functional Requirements Phase
+| Version | Description | How it Works |
+|---------|-------------|--------------|
+| **v1** | Separate DB, Backend, and Frontend | Creates detailed requirements with component hierarchies and flowcharts, focusing on UI/UX and user flows |
+| **v2** | Combined API (DB + Backend) and Frontend | Generates integrated requirements with user journeys and narrative descriptions |
+| **v3** | Custom combinations with templates | Produces use-case driven requirements with detailed actor interactions and system behaviors |
+
+### Technical Requirements Phase
+| Version | Description | How it Works |
+|---------|-------------|--------------|
+| **v1** | Separate DB, Backend, and Frontend | Generates comprehensive technical specs with system architecture, data models, and API endpoints |
+| **v2** | Combined API (DB + Backend) and Frontend | Creates unified technical documentation focusing on API-first design |
+| **v3** | Custom combinations with templates | Produces OpenAPI/Swagger specifications with detailed component interactions |
+
+### Code Generation Phase
+| Version | Description | How it Works |
+|---------|-------------|--------------|
+| **v1** | Separate DB, Backend, and Frontend | Generates independent code modules using specialized prompts for each layer |
+| **v2** | Combined API (DB + Backend) and Frontend | Creates integrated backend code first, then frontend code that aligns with the API |
+| **v3** | Custom combinations with templates | Uses provided templates to ensure consistent code structure and patterns |
+
+This structured approach ensures:
+- Clear separation of concerns
+- Consistent implementation details
+- Traceable requirements to code
+- Maintainable code quality
+- Reusable patterns and templates
 ## Features
 
 - Multiple prompt versions for requirements and code generation
@@ -24,52 +79,6 @@ This structured approach allows users to specify their needs in a natural langua
 - Rich console output with progress tracking
 - Organized project structure with documentation
 
-## Version Approaches
-
-### Functional Requirements
-
-The following table summarizes how each version generates functional requirements using different prompt versions:
-
-| Version | Description | Functional Requirements Output |
-|---------|-------------|-------------------------------|
-| **v1**  | Separate DB, Backend, and Frontend | Detailed list of functionalities, user roles, and data entities. |
-| **v2**  | Combined API (DB + Backend) and Frontend | Integrated functional requirements that align with both backend and frontend needs. |
-| **v3**  | Custom combinations with templates | Flexible output based on user-defined templates, allowing for specific functional requirements. |
-
-**Version Explanations:**
-- **v1**: This version allows for detailed control over each part of the application, making it suitable for users who want to customize each section independently.
-- **v2**: This version streamlines the process for users who want a more integrated approach to building their applications.
-- **v3**: This version provides flexibility for users who have specific requirements and want to leverage existing code patterns.
-
-### Technical Requirements
-
-The following table summarizes how each version generates technical requirements:
-
-| Version | Description | Technical Requirements Output |
-|---------|-------------|-------------------------------|
-| **v1**  | Separate DB, Backend, and Frontend | Comprehensive technical specifications for each component, including architecture and data models. |
-| **v2**  | Combined API (DB + Backend) and Frontend | Cohesive technical specifications that cover the entire application stack. |
-| **v3**  | Custom combinations with templates | Tailored technical specifications based on user-defined templates, ensuring relevant details are captured. |
-
-**Version Explanations:**
-- **v1**: Provides comprehensive specifications for each component, allowing for independent development.
-- **v2**: Offers a cohesive view of the entire application stack, ensuring all components work together.
-- **v3**: Allows for tailored specifications based on user-defined templates, enhancing relevance.
-
-### Code Generation
-
-The following table summarizes how each version generates code:
-
-| Version | Description | Code Generation Output |
-|---------|-------------|------------------------|
-| **v1**  | Separate DB, Backend, and Frontend | Distinct code sections for each component, allowing for independent customization. |
-| **v2**  | Combined API (DB + Backend) and Frontend | Integrated code output that ensures alignment between backend and frontend components. |
-| **v3**  | Custom combinations with templates | Template-based code generation that follows user-defined structures, enhancing accuracy and consistency. |
-
-**Version Explanations:**
-- **v1**: Generates distinct code sections for each component, allowing for independent customization.
-- **v2**: Ensures alignment between backend and frontend components through integrated code output.
-- **v3**: Follows user-defined structures for enhanced accuracy and consistency in code generation.
 ## Installation
 
 1. Clone the repository: 
