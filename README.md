@@ -185,7 +185,7 @@ The tool provides various options for customization:
 
 All code and llm outputs are saved in generated projects follow a consistent structure:
 
-
+```
 generated_projects/
 └── project_YYYYMMDD_HHMMSS_uniqueid/
 ├── docs/
@@ -197,6 +197,7 @@ generated_projects/
 │ └── frontend/
 │ └── output.txt
 └── project_summary.md
+```
 
 
 ### How to make the most of this tool
