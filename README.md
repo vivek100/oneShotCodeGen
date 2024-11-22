@@ -233,7 +233,8 @@ generated_projects/
     - You can edit the prompts to change what tech stack you want for your application, currently all apps are created in react frontend, sqlite for DB and nodejs/express for backend. Prompts can be found in following folder "/ai_code_generator_cli/prompts/"
 
 
-## We have different approaches using which you can generate accurate output for each phase to test which one works best for you:
+
+## Using different versions of prompts and how it works:
 
 
 ### Functional Requirements Phase
@@ -260,13 +261,10 @@ generated_projects/
 | v3 | Template-Driven Generation | Uses provided templates to ensure consistent code structure across all components |
 
 
-This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process. 
+This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process. You can test each of them to see which one works the best for your requirements.
 
 
-Allowing users to pick and choose which combination works the best for their requirements.
-
-
-NOTE: I am currently testing them all and will release a table highlighting the performance of each version, maybe modify the top ones to get higher accuracy.
+> NOTE: I am currently testing them all and will release a table highlighting the performance of each version, maybe modify the top ones to get higher accuracy.
 
 
 ## Contributing
