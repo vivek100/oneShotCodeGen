@@ -9,7 +9,6 @@ exampleGeneratedProjects/project_20241122_225843_fc08e8bd/generatedCode/frontend
 # Build output
 dist/
 build/
-generatedCode/
 
 # Environment variables
 .env
