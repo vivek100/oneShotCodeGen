@@ -82,7 +82,7 @@ Then open in an ai code editor like cursor and ask it read all the files and ref
 | v2 | Combined Backend Generation | Creates integrated backend (DB + API) first, then generates frontend to match the API |
 | v3 | Template-Driven Generation | Uses provided templates to ensure consistent code structure across all components |
 
-This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process.
+This structure allows for 27 different combinations (3x3x3) of approaches across the three phases, each serving a specific purpose in the generation process. Allowing user to pick and choose which combination works the best for their requirements.
 
 ## Features
 
