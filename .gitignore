@@ -2,7 +2,10 @@
 node_modules/
 npm-debug.log
 yarn-error.log
-
+exampleGeneratedProjects/project_20241122_225411_3592ca0a/generatedCode/backend/node_modules
+exampleGeneratedProjects/project_20241122_225411_3592ca0a/generatedCode/frontend/node_modules
+exampleGeneratedProjects/project_20241122_225843_fc08e8bd/generatedCode/backend/node_modules
+exampleGeneratedProjects/project_20241122_225843_fc08e8bd/generatedCode/frontend/node_modules
 # Build output
 dist/
 build/
