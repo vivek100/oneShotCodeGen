@@ -90,6 +90,8 @@ Database Structure:
 Backend API Code:
 {backend_code}
 
+
+
 **Code Generation Guidelines:**
 
 - Use functional components and React Hooks
@@ -371,10 +373,13 @@ def get_code_generation_prompts(version: str, backend_template: str = None, fron
     
     # If version is v3, add templates to the prompts
     if version == "v3":
-        for prompt_type in prompts:
-            prompts[prompt_type].template = prompts[prompt_type].template.format(
-                backend_code_templates=backend_template,
-                frontend_code_templates=frontend_template
+        if backend_template and "backend" in prompts:
+            prompts["backend"].template = prompts["backend"].template.replace(
+                "{backend_code_templates}", backend_template
+            )
+        if frontend_template and "frontend" in prompts:
+            prompts["frontend"].template = prompts["frontend"].template.replace(
+                "{frontend_code_templates}", frontend_template
             )
     
     return prompts 

@@ -2,7 +2,9 @@ from langchain.chains import LLMChain
 from ai_code_generator_cli.prompts.code_generation_prompts import get_code_generation_prompts
 from ai_code_generator_cli.utils.memory_utils import create_memory
 from .requirements_chain import get_llm, ModelProvider
+from ai_code_generator_cli.utils.template_utils import load_template
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,14 @@ def create_code_chains(
 ) -> dict:
     """Create code generation chains based on version configuration."""
     try:
+        # Load and process templates if provided
+        if backend_template:
+            backend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'backend.txt')
+            backend_template = load_template(backend_template)
+        if frontend_template:
+            frontend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'frontend.txt')
+            frontend_template = load_template(frontend_template)
+            
         # Get prompts for the specified version
         prompts = get_code_generation_prompts(
             code_version,
@@ -24,14 +34,6 @@ def create_code_chains(
         
         # Create a chain for each prompt type
         for prompt_type, prompt in prompts.items():
-            # Determine input variables based on prompt type and version
-            input_vars = ["functional_requirements", "technical_requirements"]
-            if code_version == "v3":
-                if prompt_type == "backend" and backend_template:
-                    input_vars.append("backend_code_templates")
-                elif prompt_type == "frontend" and frontend_template:
-                    input_vars.append("frontend_code_templates")
-            
             chains[prompt_type] = LLMChain(
                 llm=get_llm(model_provider),
                 prompt=prompt,
