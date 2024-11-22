@@ -120,14 +120,11 @@ We also have different versions of prompts for you to try out and see which lead
 
 
 Create a `.env` file in the root directory with your API keys:
-env
+```
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
-
-
-
-
-
+PROJECT_OUTPUT_DIR=./generated_projects
+```
 
 ## Usage
 
