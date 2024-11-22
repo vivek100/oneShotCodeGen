@@ -36,6 +36,11 @@ The following table summarizes how each version generates functional requirement
 | **v2**  | Combined API (DB + Backend) and Frontend | Integrated functional requirements that align with both backend and frontend needs. |
 | **v3**  | Custom combinations with templates | Flexible output based on user-defined templates, allowing for specific functional requirements. |
 
+**Version Explanations:**
+- **v1**: This version allows for detailed control over each part of the application, making it suitable for users who want to customize each section independently.
+- **v2**: This version streamlines the process for users who want a more integrated approach to building their applications.
+- **v3**: This version provides flexibility for users who have specific requirements and want to leverage existing code patterns.
+
 ### Technical Requirements
 
 The following table summarizes how each version generates technical requirements:
@@ -45,6 +50,11 @@ The following table summarizes how each version generates technical requirements
 | **v1**  | Separate DB, Backend, and Frontend | Comprehensive technical specifications for each component, including architecture and data models. |
 | **v2**  | Combined API (DB + Backend) and Frontend | Cohesive technical specifications that cover the entire application stack. |
 | **v3**  | Custom combinations with templates | Tailored technical specifications based on user-defined templates, ensuring relevant details are captured. |
+
+**Version Explanations:**
+- **v1**: Provides comprehensive specifications for each component, allowing for independent development.
+- **v2**: Offers a cohesive view of the entire application stack, ensuring all components work together.
+- **v3**: Allows for tailored specifications based on user-defined templates, enhancing relevance.
 
 ### Code Generation
 
@@ -56,14 +66,10 @@ The following table summarizes how each version generates code:
 | **v2**  | Combined API (DB + Backend) and Frontend | Integrated code output that ensures alignment between backend and frontend components. |
 | **v3**  | Custom combinations with templates | Template-based code generation that follows user-defined structures, enhancing accuracy and consistency. |
 
-### Explanation of Versions
-
-- **v1**: This version separates the generation of the database, backend, and frontend components. It allows for detailed control over each part of the application, making it suitable for users who want to customize each section independently. The output is structured in a JSON format with distinct sections for each component, which can enhance clarity but may require more user input to ensure accuracy.
-
-- **v2**: This version combines the database and backend generation into a cohesive API, along with the frontend. It streamlines the process for users who want a more integrated approach to building their applications. The output is a cohesive JSON structure that integrates both the database and API, which can improve the accuracy of the final output by ensuring that all components are aligned.
-
-- **v3**: This version allows for custom combinations using predefined templates. It provides flexibility for users who have specific requirements and want to leverage existing code patterns. The output follows a template-based JSON structure, which can enhance accuracy by adhering to established patterns but may require careful template design to ensure all necessary details are captured.
-
+**Version Explanations:**
+- **v1**: Generates distinct code sections for each component, allowing for independent customization.
+- **v2**: Ensures alignment between backend and frontend components through integrated code output.
+- **v3**: Follows user-defined structures for enhanced accuracy and consistency in code generation.
 ## Installation
 
 1. Clone the repository: 
