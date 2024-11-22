@@ -59,7 +59,7 @@ Which then you can open in an ai code editor like cursor to edit further.Because
 Then open in an ai code editor like cursor and ask it read all the files and refine it and generate the code again.
 3. Requirements only mode: You can generate the functional requirements and technical implementation details in a separate folder. Open in an ai code editor like cursor and based on the og requirements or your changes you can ask it to write the code.
 
-##We have three verions of specialized prompts for each phase to test which one works best:
+## We have three verions of specialized prompts for each phase to test which one works best:
 
 ### Functional Requirements Phase
 | Version | Description | How it Works |
