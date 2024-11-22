@@ -1,0 +1,182 @@
+Frontend Templates
+1. React Component Template
+jsx
+Copy code
+// File: {file_path}
+
+import React, { useState, useEffect } from 'react';
+import { {MaterialUIComponents} } from '@material-ui/core';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+
+// {Additional imports}
+
+function {ComponentName}() {
+  // State declarations
+  const [{state_variables}, set{StateFunction}] = useState({ initial values });
+
+  // Event handlers
+  const handle{Event} = (event) => {
+    // {Event handling logic}
+  };
+
+  // Effect hooks
+  useEffect(() => {
+    // {Side effects like data fetching}
+  }, []);
+
+  return (
+    <div>
+      {/* JSX code for rendering the component */}
+    </div>
+  );
+}
+
+export default {ComponentName};
+Placeholders:
+
+{file_path}: Path to the component file, e.g., src/components/Login.js.
+{MaterialUIComponents}: Material-UI components used, e.g., Button, TextField.
+{ComponentName}: Name of the component, e.g., Login.
+{state_variables}: State variables, e.g., email, password.
+{StateFunction}: Function to update state, e.g., setEmail.
+{Event}: Event name, e.g., Submit.
+{Event handling logic}: Logic to handle the event.
+2. Axios API Service Template
+
+// File: {file_path}
+
+import axios from 'axios';
+
+const API = axios.create({
+  baseURL: '{api_base_url}',
+});
+
+// Request interceptor to add JWT token
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+export default API;
+Placeholders:
+
+{file_path}: Path to the API service file, e.g., src/api/api.js.
+{api_base_url}: Base URL of the backend API, e.g., http://localhost:3000/api.
+3. React Router Setup Template
+jsx
+Copy code
+// File: src/App.js
+
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Login, Dashboard, LeadList, LeadForm } from './components';
+
+// {Additional imports}
+
+function App() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/leads" exact component={LeadList} />
+        <Route path="/leads/new" component={LeadForm} />
+        <Route path="/leads/edit/:id" component={LeadForm} />
+        {/* Additional routes */}
+      </Switch>
+    </Router>
+  );
+}
+
+export default App;
+4. Material-UI Theme Setup Template
+
+// File: src/theme.js
+
+import { createMuiTheme } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '{primary_color}',
+    },
+    secondary: {
+      main: '{secondary_color}',
+    },
+  },
+  // Additional theme configurations
+});
+
+export default theme;
+Placeholders:
+
+{primary_color}: Hex code of the primary color, e.g., '#0033cc'.
+{secondary_color}: Hex code of the secondary color, e.g., '#ffffff'.
+5. Index.js Entry Point Template
+
+// File: src/index.js
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { ThemeProvider } from '@material-ui/core/styles';
+import theme from './theme';
+
+// {Additional imports}
+
+ReactDOM.render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+Example Prompt Using Templates
+You can include these templates in your Phase 3 prompts for Approach 3. Here's an example of how to construct a prompt for generating the User model:
+
+Prompt:
+Instructions:
+
+You are an AI assistant tasked with generating the Sequelize model for the User entity, using the provided code template and technical specifications. Please replace the placeholders in the template with appropriate code and output the result in JSON format as specified.
+
+Code Template:
+
+
+// File: {file_path}
+
+const { DataTypes } = require('sequelize');
+const sequelize = require('{sequelize_instance_path}');
+
+const {ModelName} = sequelize.define('{ModelName}', {
+  {attribute_definitions}
+}, {
+  {model_options}
+});
+
+module.exports = {ModelName};
+Technical Specifications:
+
+Model Name: User
+Attributes:
+id: UUID, primary key, default value DataTypes.UUIDV4
+name: String, required
+email: String, required, unique
+password_hash: String, required
+role: Enum, required, values 'SalesRep', 'SalesManager'
+Model Options:
+Timestamps enabled
+Sequelize Instance Path: ../config/database.js
+Code Generation Guidelines:
+
+Replace placeholders with appropriate code.
+Use modern JavaScript (ES6+) syntax.
+Include necessary imports and exports.
+Include comments explaining each part of the code.
+Do not include any code outside the code that goes into the file content.

@@ -1,0 +1,151 @@
+Backend Templates
+1. Sequelize Model Template
+
+// File: {file_path}
+
+const { DataTypes } = require('sequelize');
+const sequelize = require('{sequelize_instance_path}');
+
+const {ModelName} = sequelize.define('{ModelName}', {
+  {attribute_definitions}
+}, {
+  {model_options}
+});
+
+module.exports = {ModelName};
+Placeholders:
+
+{file_path}: Path to the model file, e.g., src/models/User.js.
+{sequelize_instance_path}: Path to your Sequelize instance, e.g., ../config/database.js.
+{ModelName}: Name of the model, e.g., User.
+{attribute_definitions}: Definitions of model attributes and their data types.
+{model_options}: Additional model options like timestamps or table names.
+2. Express.js Route Template
+
+// File: {file_path}
+
+const express = require('express');
+const router = express.Router();
+const {ControllerName} = require('{controller_path}');
+const auth = require('{auth_middleware_path}');
+
+// {Additional imports if necessary}
+
+router.{http_method}('{endpoint}', auth, {ControllerName}.{controller_method});
+
+// {Additional routes}
+
+module.exports = router;
+Placeholders:
+
+{file_path}: Path to the route file, e.g., src/routes/userRoutes.js.
+{ControllerName}: Name of the controller, e.g., userController.
+{controller_path}: Path to the controller file, e.g., ../controllers/userController.js.
+{auth_middleware_path}: Path to the authentication middleware, e.g., ../middleware/auth.js.
+{http_method}: HTTP method (get, post, put, delete).
+{endpoint}: API endpoint, e.g., /api/users.
+{controller_method}: Method in the controller handling the request.
+3. Controller Template
+
+// File: {file_path}
+
+const {ModelName} = require('{model_path}');
+
+// {Additional imports}
+
+exports.{methodName} = async (req, res) => {
+  try {
+    // {Controller logic}
+    res.status({success_status_code}).json({ data: {response_data} });
+  } catch (error) {
+    res.status({error_status_code}).json({ error: error.message });
+  }
+};
+
+// {Additional controller methods}
+Placeholders:
+
+{file_path}: Path to the controller file, e.g., src/controllers/userController.js.
+{ModelName}: Name of the model used.
+{model_path}: Path to the model file, e.g., ../models/User.js.
+{methodName}: Name of the controller method, e.g., getUser.
+{Controller logic}: Business logic for handling the request.
+{success_status_code}: HTTP status code for success, e.g., 200.
+{response_data}: Data to return in the response.
+{error_status_code}: HTTP status code for errors, e.g., 500.
+4. Authentication Middleware Template
+
+// File: {file_path}
+
+const jwt = require('jsonwebtoken');
+const { User } = require('{user_model_path}');
+
+module.exports = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, '{jwt_secret}');
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Please authenticate.' });
+  }
+};
+Placeholders:
+
+{file_path}: Path to the middleware file, e.g., src/middleware/auth.js.
+{user_model_path}: Path to the User model, e.g., ../models/User.js.
+{jwt_secret}: Secret key for JWT (should be stored securely).
+5. Server Setup Template
+
+// File: {file_path}
+
+const express = require('express');
+const app = express();
+const sequelize = require('{sequelize_instance_path}');
+const routes = require('{routes_index_path}');
+const cors = require('cors');
+
+// {Additional imports}
+
+app.use(cors());
+app.use(express.json());
+
+// Use routes
+app.use('/api', routes);
+
+// {Error handling middleware}
+
+// Start the server
+const PORT = process.env.PORT || {default_port};
+sequelize.sync({ force: false }).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+});
+Placeholders:
+
+{file_path}: Path to the server file, e.g., server.js.
+{sequelize_instance_path}: Path to the Sequelize instance, e.g., ./config/database.js.
+{routes_index_path}: Path to the routes index file, e.g., ./routes/index.js.
+{default_port}: Default port number, e.g., 3000.
+6. Sequelize Configuration Template
+
+// File: {file_path}
+
+const { Sequelize } = require('sequelize');
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: '{database_file_path}',
+  logging: false,
+});
+
+module.exports = sequelize;
+Placeholders:
+
+{file_path}: Path to the configuration file, e.g., src/config/database.js.
+{database_file_path}: Path to the SQLite database file, e.g., ./database.sqlite3.
