@@ -197,7 +197,7 @@ generated_projects/
     └── outputCode/
         ├── backend/
         │   └── output.txt
-        └── db/(If we are generating db code seperately)
+        └── db/(If we are generating db code separately)
         |   └── output.txt
         └── frontend/
             └── output.txt
