@@ -28,7 +28,8 @@ def get_llm(provider: ModelProvider, streaming: bool = False):
     elif provider == ModelProvider.ANTHROPIC:
         return ChatAnthropic(
             temperature=0.7,
-            model="claude-3-sonnet-20240229",
+            model="claude-3-5-sonnet-20241022",
+            max_tokens= 8192,
             anthropic_api_key=settings.anthropic_api_key,
             streaming=streaming
         )

@@ -73,7 +73,7 @@ We also have different versions of prompts for you to try out and see which lead
 
 
 - Multiple prompt versions for requirements and code generation
-- Support for both OpenAI and Anthropic models(Currently Claude as an API limit of 1024 tokens so might not be useful)
+- Support for both OpenAI and Anthropic models
 - Flexible code generation strategies:
   - Combined API (DB + Backend) and Frontend (v1)
   - Separate Database, Backend, and Frontend (v2)
@@ -150,11 +150,10 @@ The tool provides various options for customization:
   ```
 
 
-- Use Anthropic's Claude instead of GPT-4:
+- If you don't specify it will use openai, but to use Anthropic's Claude instead of GPT-4:
   ```bash
   python -m ai_code_generator_cli.cli "Create a todo app" --model anthropic
   ```
-
 
 - Generate only requirements and code:
   ```bash
@@ -197,7 +196,7 @@ generated_projects/
     └── outputCode/
         ├── backend/
         │   └── output.txt
-        └── db/(If we are generating db code seperately)
+        └── db/(If we are generating db code separately)
         |   └── output.txt
         └── frontend/
             └── output.txt

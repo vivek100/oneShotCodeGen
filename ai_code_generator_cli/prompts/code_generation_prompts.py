@@ -18,8 +18,9 @@ Technical Requirements:
 - Include necessary imports and exports.
 - Do not include any code outside the code that goes into the file content.
 - Do not include comments explaining each part of the code.
-- create some mock data in all the tables and a mock user with email user@example.com and password 123456
+- create some mock data in all the tables and a mock user with email user@example.com and password 123456, this data should be automatically added when the server starts.
 - make sure you share the mkdir command for backend
+ - Make sure there are no commands that run on a file as we first run the commands for installation and then create the files, so if you give commands that run on a file like node server.js it will fail as the file does not exist yet
  - All the subsequent commands to install the packages should be shared in the commands key with prefix cd backend
  - Do not share startup commands like npm start, npm run dev, etc
  - Share project intialisation commands like npm init -y, etc after the mkdir command and add the prefix cd backend this is needed as commands will be run in the parent directory
@@ -58,6 +59,7 @@ Database Structure:
 - Do not include any code outside the code that goes into the file content.
 - Run backend on port 3000 and main server file runs in server.js and cors is enabled
 - For commands do not share mkdir command as backend folder is created previously
+ - Make sure there are no commands that run on a file as we first run the commands for installation and then create the files, so if you give commands that run on a file like node server.js it will fail as the file does not exist yet
  - All the subsequent commands to install the packages should be shared in the commands key with prefix cd backend
  - Do not share startup commands like npm start, npm run dev, etc
  - Share project intialisation commands like npm init -y, etc after the mkdir command and add the prefix cd backend this is needed as commands will be run in the parent directory
@@ -149,8 +151,9 @@ Technical Requirements:
 - Do not include comments explaining each part of the code
 - Do not include any code outside the code that goes into the file content
 - Run backend on port 3000 and main server file runs in server.js and cors is enabled
-- create some mock data in all the tables and a mock user with email user@example.com and password 123456
+- create some mock data in all the tables and a mock user with email user@example.com and password 123456, this data should be automatically added when the server starts.
 - make sure you share the mkdir command for backend
+ - Make sure there are no commands that run on a file as we first run the commands for installation and then create the files, so if you give commands that run on a file like node server.js it will fail as the file does not exist yet
  - All the subsequent commands to install the packages should be shared in the commands key with prefix cd backend
  - Do not share startup commands like npm start, npm run dev, etc
  - Share project intialisation commands like npm init -y, etc after the mkdir command and add the prefix cd backend this is needed as commands will be run in the parent directory
@@ -235,8 +238,9 @@ Code Templates:
 - Do not include comments explaining each part of the code
 - Do not include any code outside the code that goes into the file content
 - Run backend on port 3000 and main server file runs in server.js and cors is enabled
-- create some mock data in all the tables and a mock user with email user@example.com and password 123456
+- create some mock data in all the tables and a mock user with email user@example.com and password 123456, this data should be automatically added when the server starts.
 - make sure you share the mkdir command for backend
+ - Make sure there are no commands that run on a file as we first run the commands for installation and then create the files, so if you give commands that run on a file like node server.js it will fail as the file does not exist yet
  - All the subsequent commands to install the packages should be shared in the commands key with prefix cd backend
  - Do not share startup commands like npm start, npm run dev, etc
  - Share project intialisation commands like npm init -y, etc after the mkdir command and add the prefix cd backend this is needed as commands will be run in the parent directory

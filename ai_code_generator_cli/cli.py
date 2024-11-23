@@ -151,7 +151,7 @@ class CodeGenerator:
             previous_outputs[prompt_type] = result
             
             # Save the LLM output
-            output_dir = os.path.join(self.project_dir, "code", prompt_type)
+            output_dir = os.path.join(self.project_dir, "outputCode", prompt_type)
             os.makedirs(output_dir, exist_ok=True)
             
             # Save raw output
