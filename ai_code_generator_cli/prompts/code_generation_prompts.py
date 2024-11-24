@@ -27,7 +27,7 @@ Technical Requirements:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to DB
  - Do not share any other commands that are not related to DB
-Provide the implementation in JSON format:
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -67,7 +67,7 @@ Database Structure:
  - share commands to install the dependencies related to backend API and business logic
  - Do not share any other commands that are not related to backend API and business logic
 
-Provide the implementation in JSON format:
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -117,7 +117,7 @@ Backend API Code:
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
  
- Provide the implementation in JSON format:
+ Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -160,7 +160,7 @@ Technical Requirements:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to entire backend
  - Do not share any other commands that are not related to entire backend
- Provide the implementation in JSON format:
+ Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -204,7 +204,7 @@ Backend API Code:
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
  
-Provide the implementation in JSON format:
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -248,7 +248,7 @@ Code Templates:
  - share commands to install the dependencies related to entire backend
  - Do not share any other commands that are not related to entire backend
 
-Provide the implementation in JSON format:
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
@@ -296,7 +296,7 @@ Code Templates:
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
 
-Provide the implementation in JSON format:
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
