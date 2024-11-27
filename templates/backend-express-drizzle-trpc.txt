@@ -1,0 +1,145 @@
+Backend Templates
+
+1. Drizzle Schema Template
+```ts
+// File: {file_path}
+
+import { pgTable, serial, text, timestamp, boolean } from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+
+// Table definition with relations
+export const {tableName} = pgTable('{tableName}', {
+  id: serial('id').primaryKey(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  // Add other columns
+})
+
+// Relations definition
+export const {tableName}Relations = relations({tableName}, ({ one, many }) => ({
+  // Define relations
+}))
+
+// Zod schemas for type-safe operations
+export const insert{TableName}Schema = createInsertSchema({tableName})
+export const select{TableName}Schema = createSelectSchema({tableName})
+
+export type {TableName} = typeof {tableName}.$inferSelect
+export type New{TableName} = typeof {tableName}.$inferInsert
+```
+
+2. tRPC Router Template
+```ts
+// File: {file_path}
+
+import { router, publicProcedure } from '../trpc'
+import { z } from 'zod'
+import { TRPCError } from '@trpc/server'
+import { eq } from 'drizzle-orm'
+import { db } from '../db'
+import { {tableName}, insert{TableName}Schema, select{TableName}Schema } from '../schema/{tableName}'
+
+export const {routerName} = router({
+  create: publicProcedure
+    .input(insert{TableName}Schema)
+    .mutation(async ({ input }) => {
+      try {
+        const result = await db.insert({tableName})
+          .values(input)
+          .returning()
+        return result[0]
+      } catch (error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create {tableName}',
+          cause: error,
+        })
+      }
+    }),
+
+  getById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const result = await db.query.{tableName}.findFirst({
+        where: eq({tableName}.id, input.id),
+        with: {
+          // Include relations
+        },
+      })
+      
+      if (!result) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: '{TableName} not found',
+        })
+      }
+      
+      return result
+    }),
+})
+```
+
+3. Express Server Setup Template
+```ts
+// File: {file_path}
+
+import express from 'express'
+import cors from 'cors'
+import { createExpressMiddleware } from '@trpc/server/adapters/express'
+import { appRouter } from './routers'
+import { createContext } from './context'
+
+const app = express()
+
+app.use(cors())
+app.use(express.json())
+
+// tRPC middleware
+app.use('/trpc', createExpressMiddleware({
+  router: appRouter,
+  createContext,
+}))
+
+// Health check endpoint
+app.get('/health', (_, res) => {
+  res.json({ status: 'healthy' })
+})
+
+export { app }
+```
+
+4. Context Template
+```ts
+// File: {file_path}
+
+import { inferAsyncReturnType } from '@trpc/server'
+import { CreateExpressContextOptions } from '@trpc/server/adapters/express'
+
+export async function createContext({ req, res }: CreateExpressContextOptions) {
+  return {
+    req,
+    res,
+  }
+}
+
+export type Context = inferAsyncReturnType<typeof createContext>
+```
+
+File Structure:
+```
+src/
+├── schema/           # Drizzle schema definitions
+├── routers/          # tRPC routers
+│   └── index.ts      # Router exports
+├── lib/             # Utility functions
+│   └── db.ts        # Database connection
+├── context.ts      # tRPC context
+└── server.ts       # Express server setup
+```
+
+Configuration Files:
+- drizzle.config.ts: Must include proper database configuration
+- tsconfig.json: Must include strict mode and proper module resolution
+- .env: Must include database connection variables
+- package.json: Must include all required dependencies

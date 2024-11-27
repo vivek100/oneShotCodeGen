@@ -1,0 +1,141 @@
+Frontend Templates
+
+1. React Component Template (TypeScript)
+```tsx
+// File: {file_path}
+
+import { FC } from 'react'
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+interface UserCardProps {
+  user: {
+    name: string;
+    email: string;
+  };
+  onUpdate: (id: string) => void;
+}
+
+export const UserCard: React.FC<UserCardProps> = ({ user, onUpdate }) => {
+  // State declarations using type-safe hooks
+  const [isEditing, setIsEditing] = useState(false);
+  
+  useEffect(() => {
+    // Simple, focused effect
+    if (isEditing) {
+      // Do something
+    }
+  }, [isEditing]);
+  
+  return (
+    <Card className="p-6">
+      <div className="space-y-4">
+        {/* Component JSX with Tailwind classes */}
+      </div>
+    </Card>
+  )
+}
+```
+
+2. tRPC API Route Template
+```ts
+// File: {file_path}
+
+import { router, publicProcedure } from '../trpc'
+import { z } from 'zod'
+
+export const {routeName}Router = router({
+  // Define procedures with Zod validation
+  create: publicProcedure
+    .input(z.object({
+      // Input validation schema
+    }))
+    .mutation(async ({ input, ctx }) => {
+      // Procedure implementation
+    }),
+
+  get: publicProcedure
+    .input(z.object({
+      // Input validation schema
+    }))
+    .query(async ({ input, ctx }) => {
+      // Procedure implementation
+    }),
+})
+```
+
+3. Page Layout Template
+```tsx
+// File: {file_path}
+
+import { FC, PropsWithChildren } from 'react'
+
+interface {LayoutName}Props extends PropsWithChildren {
+  // Additional props
+}
+
+export const {LayoutName}: FC<{LayoutName}Props> = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto py-6">
+        {children}
+      </main>
+    </div>
+  )
+}
+```
+
+4. Store Template (Zustand)
+```ts
+// File: {file_path}
+
+import { create } from 'zustand'
+
+interface {StoreName}State {
+  // State interface
+}
+
+interface {StoreName}Actions {
+  // Actions interface
+}
+
+export const use{StoreName}Store = create<{StoreName}State & {StoreName}Actions>((set) => ({
+  // Initial state
+  
+  // Actions
+}))
+```
+
+Code Generation Rules:
+1. All components must be TypeScript files (.tsx for components, .ts for utilities)
+2. Use named exports instead of default exports
+3. Use Shadcn UI components with proper imports from "@/components/ui"
+4. Style using Tailwind CSS classes
+5. Use proper type annotations for all props and state
+6. Follow the path alias pattern (@/) for imports
+7. Use tRPC for API communication instead of REST/Axios
+8. Implement proper error boundaries and loading states
+9. Use Zustand for state management
+10. Keep components small and focused on a single responsibility
+
+File Structure:
+```
+src/
+├── components/
+│   ├── ui/          # Shadcn components
+│   └── {feature}/   # Feature-specific components
+├── lib/
+│   └── utils.ts     # Utility functions
+├── server/
+│   └── trpc/        # tRPC routers and procedures
+├── store/           # Zustand stores
+└── pages/           # Route pages
+```
+
+Configuration Files:
+- tsconfig.json: Must include path aliases and strict mode
+- vite.config.ts: Must include path resolution
+- tailwind.config.js: Must include proper content paths
+- components.json: Must include proper Shadcn configuration
