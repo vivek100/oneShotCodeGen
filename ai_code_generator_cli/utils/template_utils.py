@@ -4,10 +4,7 @@ def load_template(template_path: str) -> str:
         with open(template_path, 'r') as f:
             template_content = f.read()
             
-        # First, escape all single curly braces to double curly braces
-        template_content = template_content.replace('{', '{{').replace('}', '}}')
-        
-        # Then, convert back single curly braces for LangChain variables
+        # Define LangChain variables that should remain as single braces
         langchain_vars = [
             "functional_requirements",
             "technical_requirements",
@@ -17,11 +14,21 @@ def load_template(template_path: str) -> str:
             "frontend_code_templates"
         ]
         
-        # Replace double curly braces with single ones for LangChain variables
+        # First, escape any LangChain variables with a special marker
         for var in langchain_vars:
             template_content = template_content.replace(
-                f"{{{{{var}}}}}",  # Matches {{functional_requirements}}
-                f"{{{var}}}"       # Replaces with {functional_requirements}
+                f"{{{var}}}",
+                f"__LC_VAR__{var}__"
+            )
+        
+        # Now escape all remaining curly braces
+        template_content = template_content.replace('{', '{{').replace('}', '}}')
+        
+        # Finally, restore LangChain variables
+        for var in langchain_vars:
+            template_content = template_content.replace(
+                f"__LC_VAR__{var}__",
+                f"{{{var}}}"
             )
             
         return template_content

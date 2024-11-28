@@ -1,10 +1,19 @@
 import json
 import os
 import subprocess
+import signal
 from rich.console import Console
 import re
+from datetime import datetime
+import threading
+from .logging_utils import setup_logger, log_and_print
 
 console = Console()
+logger = setup_logger()
+
+class CommandTimeoutError(Exception):
+    """Exception raised when a command execution times out."""
+    pass
 
 def clean_json_string(json_str: str) -> str:
     """Clean and format JSON string for parsing."""
@@ -17,84 +26,122 @@ def clean_json_string(json_str: str) -> str:
 def create_folder_structure(folders: list, base_path: str) -> None:
     """Create folder structure from list of folder paths."""
     try:
-        console.print(f"[yellow]Creating folders in base path:[/yellow] {base_path}")
+        log_and_print(logger, f"Creating folders in base path: {base_path}", console_style="yellow")
         for folder in folders:
             folder_path = os.path.join(base_path, folder)
-            console.print(f"[yellow]Attempting to create folder:[/yellow] {folder_path}")
+            log_and_print(logger, f"Attempting to create folder: {folder_path}", console_style="yellow")
             os.makedirs(folder_path, exist_ok=True)
-            console.print(f"[green]Created folder:[/green] {folder_path}")
+            log_and_print(logger, f"Created folder: {folder_path}", console_style="green")
     except Exception as e:
-        console.print(f"[red]Error creating folders:[/red] {str(e)}")
+        log_and_print(logger, f"Error creating folders: {str(e)}", level='error', console_style="red")
         raise
 
 def write_files(files: dict, base_path: str) -> None:
     """Write files from dictionary of file paths and content."""
     try:
-        console.print(f"[yellow]Writing files in base path:[/yellow] {base_path}")
+        log_and_print(logger, f"Writing files in base path: {base_path}", console_style="yellow")
         for file_path, content in files.items():
             full_path = os.path.join(base_path, file_path)
-            console.print(f"[yellow]Attempting to write file:[/yellow] {full_path}")
+            log_and_print(logger, f"Attempting to write file: {full_path}", console_style="yellow")
             
             # Debug directory creation
             dir_path = os.path.dirname(full_path)
-            console.print(f"[yellow]Ensuring directory exists:[/yellow] {dir_path}")
+            log_and_print(logger, f"Ensuring directory exists: {dir_path}", console_style="yellow")
             os.makedirs(dir_path, exist_ok=True)
             
             # Write the file
             with open(full_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            console.print(f"[green]Created file:[/green] {full_path}")
+            log_and_print(logger, f"Created file: {full_path}", console_style="green")
     except Exception as e:
-        console.print(f"[red]Error writing files:[/red] {str(e)}")
+        log_and_print(logger, f"Error writing files: {str(e)}", level='error', console_style="red")
         raise
+
+def run_command_with_timeout(command, timeout=180):
+    """Run a command with timeout."""
+    process = subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    
+    timer = threading.Timer(timeout, process.kill)
+    try:
+        timer.start()
+        stdout, stderr = process.communicate()
+        if process.returncode == 0:
+            return stdout
+        else:
+            raise subprocess.CalledProcessError(process.returncode, command, stdout, stderr)
+    finally:
+        timer.cancel()
 
 def run_commands(commands: list, base_path: str) -> None:
     """Run shell commands in the base directory."""
     try:
         original_dir = os.getcwd()
-        console.print(f"[yellow]Current directory:[/yellow] {original_dir}")
-        console.print(f"[yellow]Changing to base path:[/yellow] {base_path}")
+        log_and_print(logger, f"Current directory: {original_dir}", console_style="yellow")
+        log_and_print(logger, f"Changing to base path: {base_path}", console_style="yellow")
         os.chdir(base_path)
         
+        failed_commands = []
         for command in commands:
             try:
-                console.print(f"[yellow]Running command:[/yellow] {command}")
-                console.print(f"[yellow]Current working directory:[/yellow] {os.getcwd()}")
+                log_and_print(logger, f"Running command: {command}", console_style="yellow")
+                log_and_print(logger, f"Current working directory: {os.getcwd()}", console_style="yellow")
                 
-                # Run the command as-is, letting the command handle its own directory changes
-                result = subprocess.run(
-                    command,
-                    shell=True,
-                    check=True,
-                    capture_output=True,
-                    text=True
-                )
-                if result.stdout:
-                    console.print(f"[blue]Command output:[/blue] {result.stdout}")
+                try:
+                    output = run_command_with_timeout(command)
+                    if output:
+                        log_and_print(logger, f"Command output: {output}", console_style="blue")
+                    log_and_print(logger, f"✓ Command completed successfully: {command}", console_style="green")
                 
-            except subprocess.CalledProcessError as e:
-                console.print(f"[red]Command failed:[/red] {str(e)}")
-                if e.output:
-                    console.print(f"[red]Error output:[/red] {e.output}")
-                raise
+                except subprocess.TimeoutExpired:
+                    error_msg = f"Command timed out after 180 seconds: {command}"
+                    log_and_print(logger, error_msg, level='error', console_style="red")
+                    failed_commands.append({"command": command, "error": "timeout"})
+                    continue
+                    
+                except subprocess.CalledProcessError as e:
+                    error_msg = f"Command failed: {str(e)}"
+                    if e.output:
+                        error_msg += f"\nError output: {e.output}"
+                    log_and_print(logger, error_msg, level='error', console_style="red")
+                    failed_commands.append({"command": command, "error": str(e)})
+                    continue
+                    
             except Exception as e:
-                console.print(f"[red]Error during command execution:[/red] {str(e)}")
-                console.print(f"[red]Current directory:[/red] {os.getcwd()}")
-                raise
+                error_msg = f"Error during command execution: {str(e)}"
+                log_and_print(logger, error_msg, level='error', console_style="red")
+                failed_commands.append({"command": command, "error": str(e)})
+                continue
             
     finally:
-        console.print(f"[yellow]Returning to original directory:[/yellow] {original_dir}")
+        log_and_print(logger, f"Returning to original directory: {original_dir}", console_style="yellow")
         os.chdir(original_dir)
+        
+        if failed_commands:
+            log_and_print(logger, "\nFailed commands summary:", console_style="red")
+            for fc in failed_commands:
+                log_and_print(logger, f"Command: {fc['command']}", console_style="red")
+                log_and_print(logger, f"Error: {fc['error']}\n", console_style="red")
 
 def process_code_structure(
     code_structure: str, 
     base_path: str = ".", 
-    component_type: str = None
+    component_type: str = None,
+    project_id: str = None
 ) -> None:
     """Process the code structure JSON and create files/folders."""
+    if project_id:
+        global logger
+        logger = setup_logger(project_id)
+        
     try:
-        console.print(f"\n[yellow]Processing code structure for component:[/yellow] {component_type}")
-        console.print(f"[yellow]Base path:[/yellow] {base_path}")
+        log_and_print(logger, f"\nProcessing code structure for component: {component_type}", console_style="yellow")
+        log_and_print(logger, f"Base path: {base_path}", console_style="yellow")
         
         # Extract and parse JSON
         json_str = ""
@@ -109,38 +156,41 @@ def process_code_structure(
                 json_str = code_structure[start_idx:end_idx]
         
         if not json_str:
-            raise ValueError("No valid JSON structure found in the response")
+            error_msg = "No valid JSON structure found in the response"
+            log_and_print(logger, error_msg, level='error', console_style="red")
+            raise ValueError(error_msg)
         
-        console.print(f"[yellow]Extracted JSON:[/yellow] {json_str[:200]}...")
+        log_and_print(logger, f"Extracted JSON: {json_str[:200]}...", console_style="yellow")
             
         # Parse the JSON
         try:
             structure = json.loads(json_str)
-            console.print("[green]Successfully parsed JSON structure[/green]")
+            log_and_print(logger, "Successfully parsed JSON structure", console_style="green")
         except json.JSONDecodeError:
-            console.print("[yellow]Initial JSON parse failed, attempting to clean JSON string[/yellow]")
+            log_and_print(logger, "Initial JSON parse failed, attempting to clean JSON string", console_style="yellow")
             cleaned_json = clean_json_string(json_str)
             structure = json.loads(cleaned_json)
-            console.print("[green]Successfully parsed cleaned JSON structure[/green]")
+            log_and_print(logger, "Successfully parsed cleaned JSON structure", console_style="green")
         
         # Debug structure content
-        console.print(f"[yellow]Structure contains:[/yellow]")
-        console.print(f"- Commands: {len(structure.get('commands', []))} items")
-        console.print(f"- Files: {len(structure.get('files', {}))} items")
+        log_and_print(logger, "Structure contains:", console_style="yellow")
+        log_and_print(logger, f"- Commands: {len(structure.get('commands', []))} items", console_style="yellow")
+        log_and_print(logger, f"- Files: {len(structure.get('files', {}))} items", console_style="yellow")
         
         # Process commands first (they might create initial directories)
         commands = structure.get("commands", [])
         if commands:
-            console.print(f"\n[yellow]Processing {len(commands)} commands[/yellow]")
+            log_and_print(logger, f"\nProcessing {len(commands)} commands", console_style="yellow")
             run_commands(commands, base_path)
         
         # Process files (directories will be created automatically)
         files = structure.get("files", {})
         if files:
-            console.print(f"\n[yellow]Processing {len(files)} files[/yellow]")
+            log_and_print(logger, f"\nProcessing {len(files)} files", console_style="yellow")
             write_files(files, base_path)
         
     except Exception as e:
-        console.print(f"[red]Error processing code structure:[/red] {str(e)}")
-        console.print(f"[red]Current working directory:[/red] {os.getcwd()}")
-        raise 
+        error_msg = f"Error processing code structure: {str(e)}"
+        log_and_print(logger, error_msg, level='error', console_style="red")
+        log_and_print(logger, f"Current working directory: {os.getcwd()}", level='error', console_style="red")
+        raise

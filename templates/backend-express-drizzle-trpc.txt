@@ -139,7 +139,81 @@ src/
 ```
 
 Configuration Files:
-- drizzle.config.ts: Must include proper database configuration
-- tsconfig.json: Must include strict mode and proper module resolution
-- .env: Must include database connection variables
-- package.json: Must include all required dependencies
+
+1. drizzle.config.ts
+```ts
+import type { Config } from 'drizzle-kit'
+
+export default {
+  schema: './src/schema/*',
+  out: './drizzle',
+  driver: 'pg',
+  dbCredentials: {
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 5432,
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
+    database: process.env.DB_NAME || 'myapp',
+  },
+} satisfies Config
+```
+
+2. tsconfig.json
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+3. package.json
+```json
+{
+  "dependencies": {
+    "@trpc/server": "^10.x",
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.29.x",
+    "drizzle-zod": "^0.5.x",
+    "express": "^4.18.x",
+    "pg": "^8.11.x",
+    "zod": "^3.22.x"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.x",
+    "@types/express": "^4.17.x",
+    "@types/node": "^20.x",
+    "@types/pg": "^8.10.x",
+    "drizzle-kit": "^0.20.x",
+    "typescript": "^5.x"
+  }
+}
+```
+
+4. .env
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=myapp
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development

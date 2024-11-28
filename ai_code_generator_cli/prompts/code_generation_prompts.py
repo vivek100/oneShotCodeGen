@@ -145,89 +145,89 @@ Backend API Code:
   
   2. tailwind.config.js (content part):
      ```js
-     /** @type {import('tailwindcss').Config} */
-     module.exports = {
-       content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
-       theme: {
-         extend: {},
-       },
-       plugins: [],
-     }
+     /** @type {{import('tailwindcss').Config}} */
+     module.exports = {{
+       content: ["./index.html", "./src/**/*.{{ts,tsx,js,jsx}}"],
+       theme: {{
+         extend: {{}}
+       }},
+       plugins: []
+     }}
      ```
 
   3. tsconfig.json (compilerOptions part):
      ```json
-     {
+     {{
        "files": [],
        "references": [
-         {
+         {{
            "path": "./tsconfig.app.json"
-         },
-         {
+         }},
+         {{
            "path": "./tsconfig.node.json"
-         }
+         }}
        ],
-       "compilerOptions": {
+       "compilerOptions": {{
          "baseUrl": ".",
-         "paths": {
+         "paths": {{
            "@/*": ["./src/*"]
-         }
-       }
-     }
+         }}
+       }}
+     }}
      ```
 
   4. tsconfig.app.json:
      ```json
-     {
-       "compilerOptions": {
+     {{
+       "compilerOptions": {{
          "baseUrl": ".",
-         "paths": {
+         "paths": {{
            "@/*": ["./src/*"]
-         }
-       }
-     }
+         }}
+       }}
+     }}
      ```
 
   5. vite.config.ts:
      ```typescript
      import path from "path"
      import react from "@vitejs/plugin-react"
-     import { defineConfig } from "vite"
+     import {{ defineConfig }} from "vite"
      
-     export default defineConfig({
+     export default defineConfig {{
        plugins: [react()],
-       resolve: {
-         alias: {
+       resolve: {{
+         alias: {{
            "@": path.resolve(__dirname, "./src"),
-         },
-       },
-     })
+         }},
+       }},
+     }}
      ```
 
   6. components.json:
      ```json
-     {
+     {{
        "$schema": "https://ui.shadcn.com/schema.json",
        "style": "new-york",
-       "tailwind": {
+       "tailwind": {{
          // configuration will be added by shadcn init
-       },
-       "aliases": {
+       }},
+       "aliases": {{
          "components": "@/components",
          "utils": "@/lib/utils",
          "ui": "@/components/ui",
          "lib": "@/lib",
          "hooks": "@/hooks"
-       }
-     }
+       }}
+     }}
      ```
 
   All imports should use the configured aliases (example):
   ```typescript
-  import { Button } from "@/components/ui/button"
-  import { Card } from "@/components/ui/card"
-  import { Input } from "@/components/ui/input"
-  import { Label } from "@/components/ui/label"
+  import {{ Button }} from "@/components/ui/button"
+  import {{ Card }} from "@/components/ui/card"
+  import {{ Input }} from "@/components/ui/input"
+  import {{ Label }} from "@/components/ui/label"
   ```
 Your response should be strictky only code and that too in following JSON format::
 {{

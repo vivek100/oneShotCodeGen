@@ -10,29 +10,17 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-interface UserCardProps {
-  user: {
-    name: string;
-    email: string;
-  };
-  onUpdate: (id: string) => void;
+interface {ComponentName}Props {
+  // Props interface
 }
 
-export const UserCard: React.FC<UserCardProps> = ({ user, onUpdate }) => {
-  // State declarations using type-safe hooks
-  const [isEditing, setIsEditing] = useState(false);
-  
-  useEffect(() => {
-    // Simple, focused effect
-    if (isEditing) {
-      // Do something
-    }
-  }, [isEditing]);
-  
+export const {ComponentName}: FC<{ComponentName}Props> = () => {
   return (
     <Card className="p-6">
       <div className="space-y-4">
-        {/* Component JSX with Tailwind classes */}
+        <Label>Label Example</Label>
+        <Input placeholder="Input example" />
+        <Button>Button Example</Button>
       </div>
     </Card>
   )
@@ -135,7 +123,118 @@ src/
 ```
 
 Configuration Files:
-- tsconfig.json: Must include path aliases and strict mode
-- vite.config.ts: Must include path resolution
-- tailwind.config.js: Must include proper content paths
-- components.json: Must include proper Shadcn configuration
+
+1. tsconfig.json
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+2. tailwind.config.js
+```js
+/** @type {import('tailwindcss').Config} */
+const config = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+    },
+  },
+  plugins: ["tailwindcss-animate"],
+}
+
+export default config
+```
+
+3. vite.config.ts
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+```
