@@ -59,24 +59,78 @@ def write_files(files: dict, base_path: str) -> None:
 
 def run_command_with_timeout(command, timeout=180):
     """Run a command with timeout."""
-    process = subprocess.Popen(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    
-    timer = threading.Timer(timeout, process.kill)
     try:
-        timer.start()
-        stdout, stderr = process.communicate()
-        if process.returncode == 0:
-            return stdout
+        # On Windows, we need to create a new process group
+        if os.name == 'nt':
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            process = subprocess.Popen(
+                command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                startupinfo=startupinfo
+            )
         else:
-            raise subprocess.CalledProcessError(process.returncode, command, stdout, stderr)
-    finally:
-        timer.cancel()
+            process = subprocess.Popen(
+                command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+        
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+            if process.returncode == 0:
+                return stdout
+            else:
+                raise subprocess.CalledProcessError(process.returncode, command, stdout, stderr)
+        except subprocess.TimeoutExpired:
+            # On Windows, we need to forcefully terminate the entire process tree
+            if os.name == 'nt':
+                with open(os.devnull, 'w') as devnull:
+                    # First try CTRL+C
+                    try:
+                        process.send_signal(signal.CTRL_C_EVENT)
+                        try:
+                            process.wait(timeout=5)  # Give it 5 seconds to respond to CTRL+C
+                        except subprocess.TimeoutExpired:
+                            pass
+                    except Exception:
+                        pass
+                    
+                    # If still running, use taskkill
+                    if process.poll() is None:
+                        subprocess.run(
+                            f'taskkill /F /T /PID {process.pid}',
+                            shell=True,
+                            stdout=devnull,
+                            stderr=devnull
+                        )
+            else:
+                # On Unix, terminate process group
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+            
+            # Clean up any remaining output
+            try:
+                stdout, stderr = process.communicate(timeout=1)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                stdout, stderr = process.communicate()
+            
+            raise CommandTimeoutError(f"Command timed out after {timeout} seconds: {command}")
+            
+    except Exception as e:
+        if not isinstance(e, CommandTimeoutError):
+            raise Exception(f"Error running command: {str(e)}")
+        raise
 
 def run_commands(commands: list, base_path: str) -> None:
     """Run shell commands in the base directory."""
@@ -96,7 +150,7 @@ def run_commands(commands: list, base_path: str) -> None:
                     output = run_command_with_timeout(command)
                     if output:
                         log_and_print(logger, f"Command output: {output}", console_style="blue")
-                    log_and_print(logger, f"✓ Command completed successfully: {command}", console_style="green")
+                    log_and_print(logger, f"[OK] Command completed successfully: {command}", console_style="green")
                 
                 except subprocess.TimeoutExpired:
                     error_msg = f"Command timed out after 180 seconds: {command}"
@@ -176,11 +230,12 @@ def process_code_structure(
         log_and_print(logger, "Structure contains:", console_style="yellow")
         log_and_print(logger, f"- Commands: {len(structure.get('commands', []))} items", console_style="yellow")
         log_and_print(logger, f"- Files: {len(structure.get('files', {}))} items", console_style="yellow")
+        log_and_print(logger, f"- Post-creation commands: {len(structure.get('post_creation_commands', []))} items", console_style="yellow")
         
         # Process commands first (they might create initial directories)
         commands = structure.get("commands", [])
         if commands:
-            log_and_print(logger, f"\nProcessing {len(commands)} commands", console_style="yellow")
+            log_and_print(logger, f"\nProcessing {len(commands)} initial commands", console_style="yellow")
             run_commands(commands, base_path)
         
         # Process files (directories will be created automatically)
@@ -188,6 +243,12 @@ def process_code_structure(
         if files:
             log_and_print(logger, f"\nProcessing {len(files)} files", console_style="yellow")
             write_files(files, base_path)
+            
+        # Process post-creation commands
+        post_commands = structure.get("post_creation_commands", [])
+        if post_commands:
+            log_and_print(logger, f"\nProcessing {len(post_commands)} post-creation commands", console_style="yellow")
+            run_commands(post_commands, base_path)
         
     except Exception as e:
         error_msg = f"Error processing code structure: {str(e)}"

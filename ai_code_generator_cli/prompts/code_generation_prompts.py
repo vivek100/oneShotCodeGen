@@ -34,7 +34,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content" 
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 CODE_GENERATION_V1_API = """
@@ -75,7 +76,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content" 
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -117,22 +119,25 @@ Backend API Code:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
- - For frontend initialization and setup include these commands in the commands key:
+ - For frontend initialization and setup include these commands:
   1. Create Vite project: `echo y | npm create vite@latest frontend -- --template react-ts`
   2. Install base dependencies: `cd frontend && npm install`
-  3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
-  4. Initialize Tailwind: `npx tailwindcss init -p`
-  5. Install path resolution dependency: `npm install -D @types/node`
-  6. Initialize shadcn: `npx shadcn@latest init`
-  7. Add required shadcn components using separate commands:
-     - Each component must be added individually: `npx shadcn@latest add [component-name]`
+  3. Install Tailwind and its dependencies: `cd frontend && npm install -D tailwindcss postcss autoprefixer`
+  4. Initialize Tailwind: `cd frontend && npx tailwindcss init -p`
+  5. Install path resolution dependency: `cd frontend && npm install -D @types/node`
+  6. For TypeScript projects, initialize TypeScript: `cd frontend && npx tsc --init`
+  
+  Shadcn setup commands in the post_creation_commands key (IMPORTANT - shadcn init command must use 'echo y' to auto-confirm):
+  1. Initialize shadcn (MUST use echo y): `cd frontend && echo y | npx shadcn@latest init`
+  2. Add required shadcn components using separate commands:
+     - Each component must be added individually: `cd frontend &&npx shadcn@latest add [component-name]`
      - Never combine shadcn add commands with && or other operators
      - Example: 
        ```
-       npx shadcn@latest add button
-       npx shadcn@latest add card
-       npx shadcn@latest add input
-       npx shadcn@latest add label
+       cd frontend && npx shadcn@latest add button
+       cd frontend && npx shadcn@latest add card
+       cd frontend && npx shadcn@latest add input
+       cd frontend && npx shadcn@latest add label
        ```
 
   Required file configurations to be included in the files key:
@@ -235,7 +240,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -280,7 +286,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 CODE_GENERATION_V2_FRONTEND = """
@@ -324,10 +331,12 @@ Backend API Code:
   3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
   4. Initialize Tailwind: `npx tailwindcss init -p`
   5. Install path resolution dependency: `npm install -D @types/node`
-  6. Initialize shadcn: `npx shadcn@latest init`
+  6. Initialize shadcn: `echo y | npx shadcn@latest init`
   7. Add required shadcn components using separate commands:
      - Each component must be added individually: `npx shadcn@latest add [component-name]`
      - Never combine shadcn add commands with && or other operators
+     - Never use the faulty `npx shacn-ui@latest` only `npx shadcn@latest`
+     - When using `npx shadcn@latest init`, add the prefix `echo y | `
      - Example: 
        ```
        npx shadcn@latest add button
@@ -436,7 +445,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -481,7 +491,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -529,7 +540,7 @@ Code Templates:
   3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
   4. Initialize Tailwind: `npx tailwindcss init -p`
   5. Install path resolution dependency: `npm install -D @types/node`
-  6. Initialize shadcn: `npx shadcn@latest init`
+  6. Initialize shadcn: `echo y | npx shadcn@latest init`
   7. Add required shadcn components using separate commands:
      - Each component must be added individually: `npx shadcn@latest add [component-name]`
      - Never combine shadcn add commands with && or other operators
@@ -641,7 +652,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -725,4 +737,4 @@ def get_code_generation_prompts(version: str, backend_template: str = None, fron
                 "{frontend_code_templates}", frontend_template
             )
     
-    return prompts 
+    return prompts
