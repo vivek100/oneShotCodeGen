@@ -9,7 +9,12 @@ import threading
 from .logging_utils import setup_logger, log_and_print
 
 console = Console()
-logger = setup_logger()
+logger = None  # Initialize logger as None
+
+def init_logger(project_dir=None):
+    global logger
+    logger = setup_logger(project_dir)
+    return logger
 
 class CommandTimeoutError(Exception):
     """Exception raised when a command execution times out."""
@@ -187,14 +192,14 @@ def process_code_structure(
     base_path: str = ".", 
     component_type: str = None,
     project_id: str = None
-) -> None:
+):
     """Process the code structure JSON and create files/folders."""
-    if project_id:
-        global logger
-        logger = setup_logger(project_id)
-        
     try:
-        log_and_print(logger, f"\nProcessing code structure for component: {component_type}", console_style="yellow")
+        # Initialize logger with project directory
+        global logger
+        logger = init_logger(base_path)
+        
+        log_and_print(logger, f"Processing code structure for component: {component_type}", console_style="yellow")
         log_and_print(logger, f"Base path: {base_path}", console_style="yellow")
         
         # Extract and parse JSON

@@ -127,8 +127,8 @@ Backend API Code:
   5. Install path resolution dependency: `cd frontend && npm install -D @types/node`
   6. For TypeScript projects, initialize TypeScript: `cd frontend && npx tsc --init`
   
-  Shadcn setup commands in the post_creation_commands key (IMPORTANT - shadcn init command must use 'echo y' to auto-confirm):
-  1. Initialize shadcn (MUST use echo y): `cd frontend && echo y | npx shadcn@latest init`
+  Shadcn setup commands in the post_creation_commands key:
+  1. Initialize shadcn(MUST]): `cd frontend && npx shadcn@latest init -y -d`
   2. Add required shadcn components using separate commands:
      - Each component must be added individually: `cd frontend &&npx shadcn@latest add [component-name]`
      - Never combine shadcn add commands with && or other operators
@@ -540,7 +540,7 @@ Code Templates:
   3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
   4. Initialize Tailwind: `npx tailwindcss init -p`
   5. Install path resolution dependency: `npm install -D @types/node`
-  6. Initialize shadcn: `echo y | npx shadcn@latest init`
+  6. Initialize shadcn: `npx shadcn@latest init -y -d`
   7. Add required shadcn components using separate commands:
      - Each component must be added individually: `npx shadcn@latest add [component-name]`
      - Never combine shadcn add commands with && or other operators
@@ -738,3 +738,7 @@ def get_code_generation_prompts(version: str, backend_template: str = None, fron
             )
     
     return prompts
+
+
+
+    

@@ -5,10 +5,14 @@ from rich.console import Console
 
 console = Console()
 
-def setup_logger(project_id=None):
+def setup_logger(project_dir=None):
     """Setup logger with file and console handlers."""
-    # Create logs directory if it doesn't exist
-    logs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'Logs')
+    # Create logs directory in the project directory if provided, otherwise in the root
+    if project_dir:
+        logs_dir = os.path.join(project_dir, 'logs')
+    else:
+        logs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'Logs')
+    
     os.makedirs(logs_dir, exist_ok=True)
 
     # Create logger
@@ -24,8 +28,8 @@ def setup_logger(project_id=None):
 
     # File handler
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_filename = f"codegen_{timestamp}.log" if not project_id else f"codegen_{project_id}.log"
-    file_handler = logging.FileHandler(os.path.join(logs_dir, log_filename))
+    log_filename = f"codegen_{timestamp}.log"
+    file_handler = logging.FileHandler(os.path.join(logs_dir, log_filename), encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
