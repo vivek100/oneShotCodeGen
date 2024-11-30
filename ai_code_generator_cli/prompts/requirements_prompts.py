@@ -116,16 +116,16 @@ Include any additional technical considerations relevant to the application.
 Present the technical specifications in a clear, organized document, using headings and subheadings for each section.
 Note:
 - **Technology Stack:**
-  - **Database:** sqlite3
-  - **ORM:** Sequelize (Node.js)
-  - **Backend Framework:** Express.js (Node.js)
-  - **ORM:** Sequelize
-  - **Authentication:** JSON Web Tokens (JWT)
-  - **Frontend Framework:** React.js (v17.0.2)
-  - **UI Library:** Material-UI (v5.0.0)
-  - **State Management:** React Hooks
-  - **HTTP Client:** Axios
-  - **Routing:** React Router (v5.2.0)
+  - **Database:** Supabase
+  - **ORM:** Drizzle
+  - **Backend Framework:** tRPC + Express
+  - **Authentication:** Clerk
+  - **Frontend Framework:** React + Vite (v18.0.0) (scaffold using `echo y | npx create-vite frontend --- --template react-ts`)
+  - **UI Library:** Shadcn@latest + Tailwind CSS
+  - **State Management:** zustand
+  - **HTTP Client:** tRPC
+  - **Routing:** React Router
+  - **Type Safety:** typescript throughout
 Requirements Document:
 {functional_requirements}
 """
@@ -150,16 +150,16 @@ Include any other relevant technical information that supports the visual repres
 Present the specifications in a clear and organized manner, ensuring that the textual descriptions accurately convey the structure and interactions within the system.
 Note:
 - **Technology Stack:**
-  - **Database:** sqlite3
-  - **ORM:** Sequelize (Node.js)
-  - **Backend Framework:** Express.js (Node.js)
-  - **ORM:** Sequelize
-  - **Authentication:** JSON Web Tokens (JWT)
-  - **Frontend Framework:** React.js (v17.0.2)
-  - **UI Library:** Material-UI (v5.0.0)
-  - **State Management:** React Hooks
-  - **HTTP Client:** Axios
-  - **Routing:** React Router (v5.2.0)
+  - **Database:** Supabase
+  - **ORM:** Drizzle
+  - **Backend Framework:** tRPC + Express
+  - **Authentication:** Clerk
+  - **Frontend Framework:** React + Vite (v18.0.0) (scaffold using `echo y | npx create-vite frontend --- --template react-ts`)
+  - **UI Library:** Shadcn@latest + Tailwind CSS
+  - **State Management:** zustand
+  - **HTTP Client:** tRPC
+  - **Routing:** React Router
+  - **Type Safety:** typescript throughout
 Requirements Document:
 {functional_requirements}
 """
@@ -191,16 +191,16 @@ Various components used and the necessary details needed for it.
 Present the API specifications in a clear, organized OpenAPI format using YAML or JSON syntax.
 Note:
 - **Technology Stack:**
-  - **Database:** sqlite3
-  - **ORM:** Sequelize (Node.js)
-  - **Backend Framework:** Express.js (Node.js)
-  - **ORM:** Sequelize
-  - **Authentication:** JSON Web Tokens (JWT)
-  - **Frontend Framework:** React.js (v17.0.2)
-  - **UI Library:** Material-UI (v5.0.0)
-  - **State Management:** React Hooks
-  - **HTTP Client:** Axios
-  - **Routing:** React Router (v5.2.0)
+  - **Database:** Supabase
+  - **ORM:** Drizzle
+  - **Backend Framework:** tRPC + Express
+  - **Authentication:** Clerk
+  - **Frontend Framework:** React + Vite (v18.0.0) (scaffold using `echo y | npx create-vite frontend --- --template react-ts`)
+  - **UI Library:** Shadcn@latest + Tailwind CSS
+  - **State Management:** zustand
+  - **HTTP Client:** tRPC
+  - **Routing:** React Router
+  - **Type Safety:** typescript throughout
 Requirements Document:
 {functional_requirements}
 """

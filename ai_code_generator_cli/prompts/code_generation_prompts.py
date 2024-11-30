@@ -13,9 +13,10 @@ Technical Requirements:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Use modern JavaScript (ES6+) syntax.
 - Define models with attributes, data types, validations, and associations.
-- Include necessary imports and exports.
+- Include necessary imports and exports (Use @ Alias for Imports)
 - Do not include any code outside the code that goes into the file content.
 - Do not include comments explaining each part of the code.
 - create some mock data in all the tables and a mock user with email user@example.com and password 123456, this data should be automatically added when the server starts.
@@ -33,7 +34,8 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content" 
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 CODE_GENERATION_V1_API = """
@@ -52,8 +54,9 @@ Database Structure:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Organize code into controllers, routes, and middleware.
-- Include necessary imports and exports.
+- Include necessary imports and exports (Use @ Alias for Imports)
 - Use async/await for asynchronous operations.
 - Do not include comments explaining each part of the code.
 - Do not include any code outside the code that goes into the file content.
@@ -73,12 +76,13 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content" 
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
 CODE_GENERATION_V1_FRONTEND = """
-You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and Material-UI.
+You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and Shadcn@latest.
 
 Functional Requirements:
 {functional_requirements}
@@ -92,14 +96,13 @@ Database Structure:
 Backend API Code:
 {backend_code}
 
-
-
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Use functional components and React Hooks
-- Implement form handling, validations, and API interactions
+- Implement form handling, validations, and tRPC client interactions
 - Ensure form fields match database schema
-- Ensure API calls match backend endpoints
+- Ensure tRPC procedure calls match backend endpoints
 - Include TypeScript interfaces/types that match database models
 - Do not add comments
 - Ensure without fail that all UI elements/component/pages are generated in the code ouput
@@ -116,14 +119,129 @@ Backend API Code:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
- 
- Your response should be strictky only code and that too in following JSON format::
+ - For frontend initialization and setup include these commands:
+  1. Create Vite project: `echo y | npm create vite@latest frontend -- --template react-ts`
+  2. Install base dependencies: `cd frontend && npm install`
+  3. Install Tailwind and its dependencies: `cd frontend && npm install -D tailwindcss postcss autoprefixer`
+  4. Initialize Tailwind: `cd frontend && npx tailwindcss init -p`
+  5. Install path resolution dependency: `cd frontend && npm install -D @types/node`
+  6. For TypeScript projects, initialize TypeScript: `cd frontend && npx tsc --init`
+  
+  Shadcn setup commands in the post_creation_commands key:
+  1. Initialize shadcn(MUST]): `cd frontend && npx shadcn@latest init -y -d`
+  2. Add required shadcn components using separate commands:
+     - Each component must be added individually: `cd frontend &&npx shadcn@latest add [component-name]`
+     - Never combine shadcn add commands with && or other operators
+     - Example: 
+       ```
+       cd frontend && npx shadcn@latest add button
+       cd frontend && npx shadcn@latest add card
+       cd frontend && npx shadcn@latest add input
+       cd frontend && npx shadcn@latest add label
+       ```
+
+  Required file configurations to be included in the files key:
+  1. src/index.css:
+     ```css
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+     ```
+  
+  2. tailwind.config.js (content part):
+     ```js
+     /** @type {{import('tailwindcss').Config}} */
+     module.exports = {{
+       content: ["./index.html", "./src/**/*.{{ts,tsx,js,jsx}}"],
+       theme: {{
+         extend: {{}}
+       }},
+       plugins: []
+     }}
+     ```
+
+  3. tsconfig.json (compilerOptions part):
+     ```json
+     {{
+       "files": [],
+       "references": [
+         {{
+           "path": "./tsconfig.app.json"
+         }},
+         {{
+           "path": "./tsconfig.node.json"
+         }}
+       ],
+       "compilerOptions": {{
+         "baseUrl": ".",
+         "paths": {{
+           "@/*": ["./src/*"]
+         }}
+       }}
+     }}
+     ```
+
+  4. tsconfig.app.json:
+     ```json
+     {{
+       "compilerOptions": {{
+         "baseUrl": ".",
+         "paths": {{
+           "@/*": ["./src/*"]
+         }}
+       }}
+     }}
+     ```
+
+  5. vite.config.ts:
+     ```typescript
+     import path from "path"
+     import react from "@vitejs/plugin-react"
+     import {{ defineConfig }} from "vite"
+     
+     export default defineConfig {{
+       plugins: [react()],
+       resolve: {{
+         alias: {{
+           "@": path.resolve(__dirname, "./src"),
+         }},
+       }},
+     }}
+     ```
+
+  6. components.json:
+     ```json
+     {{
+       "$schema": "https://ui.shadcn.com/schema.json",
+       "style": "new-york",
+       "tailwind": {{
+         // configuration will be added by shadcn init
+       }},
+       "aliases": {{
+         "components": "@/components",
+         "utils": "@/lib/utils",
+         "ui": "@/components/ui",
+         "lib": "@/lib",
+         "hooks": "@/hooks"
+       }}
+     }}
+     ```
+
+  All imports should use the configured aliases (example):
+  ```typescript
+  import {{ Button }} from "@/components/ui/button"
+  import {{ Card }} from "@/components/ui/card"
+  import {{ Input }} from "@/components/ui/input"
+  import {{ Label }} from "@/components/ui/label"
+  ```
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -140,12 +258,13 @@ Technical Requirements:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Generate both database models and API endpoints in a cohesive manner
 - Use modern JavaScript (ES6+) syntax
 - Define models with attributes, data types, validations, and associations
 - Implement RESTful API endpoints that properly utilize the models
 - Organize code into models, controllers, routes, and middleware
-- Include necessary imports and exports
+- Include necessary imports and exports (Use @ Alias for Imports)
 - Use async/await for asynchronous operations
 - Implement proper error handling and validation
 - Do not include comments explaining each part of the code
@@ -160,17 +279,19 @@ Technical Requirements:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to entire backend
  - Do not share any other commands that are not related to entire backend
- Your response should be strictky only code and that too in following JSON format::
+
+Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 CODE_GENERATION_V2_FRONTEND = """
-You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and Material-UI.
+You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and shadcn@latest.
 
 Functional Requirements:
 {functional_requirements}
@@ -183,9 +304,10 @@ Backend API Code:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Use functional components and React Hooks
-- Implement form handling, validations, and API interactions
-- Ensure API calls match backend endpoints exactly
+- Implement form handling, validations, and tRPC client interactions
+- Ensure tRPC procedure calls match backend endpoints exactly
 - Include TypeScript interfaces/types that match backend models
 - Implement proper error handling and loading states
 - Do not add comments
@@ -203,14 +325,128 @@ Backend API Code:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
- 
+ - For frontend initialization and setup include these commands in the commands key:
+  1. Create Vite project: `echo y | npm create vite@latest frontend -- --template react-ts`
+  2. Install base dependencies: `cd frontend && npm install`
+  3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
+  4. Initialize Tailwind: `npx tailwindcss init -p`
+  5. Install path resolution dependency: `npm install -D @types/node`
+  6. Initialize shadcn: `echo y | npx shadcn@latest init`
+  7. Add required shadcn components using separate commands:
+     - Each component must be added individually: `npx shadcn@latest add [component-name]`
+     - Never combine shadcn add commands with && or other operators
+     - Never use the faulty `npx shacn-ui@latest` only `npx shadcn@latest`
+     - When using `npx shadcn@latest init`, add the prefix `echo y | `
+     - Example: 
+       ```
+       npx shadcn@latest add button
+       npx shadcn@latest add card
+       npx shadcn@latest add input
+       npx shadcn@latest add label
+       ```
+
+  Required file configurations to be included in the files key:
+  1. src/index.css:
+     ```css
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+     ```
+  
+  2. tailwind.config.js (content part):
+     ```js
+     /** @type {import('tailwindcss').Config} */
+     module.exports = {
+       content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+       theme: {
+         extend: {},
+       },
+       plugins: [],
+     }
+     ```
+
+  3. tsconfig.json (compilerOptions part):
+     ```json
+     {
+       "files": [],
+       "references": [
+         {
+           "path": "./tsconfig.app.json"
+         },
+         {
+           "path": "./tsconfig.node.json"
+         }
+       ],
+       "compilerOptions": {
+         "baseUrl": ".",
+         "paths": {
+           "@/*": ["./src/*"]
+         }
+       }
+     }
+     ```
+
+  4. tsconfig.app.json:
+     ```json
+     {
+       "compilerOptions": {
+         "baseUrl": ".",
+         "paths": {
+           "@/*": ["./src/*"]
+         }
+       }
+     }
+     ```
+
+  5. vite.config.ts:
+     ```typescript
+     import path from "path"
+     import react from "@vitejs/plugin-react"
+     import { defineConfig } from "vite"
+     
+     export default defineConfig({
+       plugins: [react()],
+       resolve: {
+         alias: {
+           "@": path.resolve(__dirname, "./src"),
+         },
+       },
+     })
+     ```
+
+  6. components.json:
+     ```json
+     {
+       "$schema": "https://ui.shadcn.com/schema.json",
+       "style": "new-york",
+       "tailwind": {
+         // configuration will be added by shadcn init
+       },
+       "aliases": {
+         "components": "@/components",
+         "utils": "@/lib/utils",
+         "ui": "@/components/ui",
+         "lib": "@/lib",
+         "hooks": "@/hooks"
+       }
+     }
+     ```
+
+  All imports should use the configured aliases (example):
+  ```typescript
+  import { Button } from "@/components/ui/button"
+  import { Card } from "@/components/ui/card"
+  import { Input } from "@/components/ui/input"
+  import { Label } from "@/components/ui/label"
+  ```
 Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -230,6 +466,7 @@ Code Templates:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Follow the provided code templates structure and patterns
 - Generate both database models and API endpoints
 - Use modern JavaScript (ES6+) syntax
@@ -254,12 +491,13 @@ Your response should be strictky only code and that too in following JSON format
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
 CODE_GENERATION_V3_FRONTEND = """
-You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and Material-UI.
+You are an expert frontend developer. Tasked with generating the **Frontend Components** and **UI Logic** for the application, using React.js and shadcn@latest.
 
 Functional Requirements:
 {functional_requirements}
@@ -275,10 +513,11 @@ Code Templates:
 
 **Code Generation Guidelines:**
 
+- Use TypeScript for all code files
 - Follow the provided code templates structure and patterns
 - Use functional components and React Hooks
-- Implement form handling, validations, and API interactions
-- Ensure API calls match backend endpoints exactly
+- Implement form handling, validations, and tRPC client interactions
+- Ensure tRPC procedure calls match backend endpoints exactly
 - Include TypeScript interfaces/types that match backend models
 - Do not add comments
 - Ensure without fail that all UI elements/component/pages are generated in the code ouput
@@ -295,14 +534,126 @@ Code Templates:
  - Do not share any other mkdir commands to create sub folders, they are not needed as they get automatically created when files are created
  - share commands to install the dependencies related to frontend
  - Do not share any other commands that are not related to frontend
+ - For frontend initialization and setup include these commands in the commands key:
+  1. Create Vite project: `npm create vite@latest frontend -- --template react-ts`
+  2. Install base dependencies: `cd frontend && npm install`
+  3. Install Tailwind and its dependencies: `npm install -D tailwindcss postcss autoprefixer`
+  4. Initialize Tailwind: `npx tailwindcss init -p`
+  5. Install path resolution dependency: `npm install -D @types/node`
+  6. Initialize shadcn: `npx shadcn@latest init -y -d`
+  7. Add required shadcn components using separate commands:
+     - Each component must be added individually: `npx shadcn@latest add [component-name]`
+     - Never combine shadcn add commands with && or other operators
+     - Example: 
+       ```
+       npx shadcn@latest add button
+       npx shadcn@latest add card
+       npx shadcn@latest add input
+       npx shadcn@latest add label
+       ```
 
+  Required file configurations to be included in the files key:
+  1. src/index.css:
+     ```css
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+     ```
+  
+  2. tailwind.config.js:
+     ```js
+     /** @type {import('tailwindcss').Config} */
+     module.exports = {
+       content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+       theme: {
+         extend: {},
+       },
+       plugins: [],
+     }
+     ```
+
+  3. tsconfig.json:
+     ```json
+     {
+       "files": [],
+       "references": [
+         {
+           "path": "./tsconfig.app.json"
+         },
+         {
+           "path": "./tsconfig.node.json"
+         }
+       ],
+       "compilerOptions": {
+         "baseUrl": ".",
+         "paths": {
+           "@/*": ["./src/*"]
+         }
+       }
+     }
+     ```
+
+  4. tsconfig.app.json:
+     ```json
+     {
+       "compilerOptions": {
+         "baseUrl": ".",
+         "paths": {
+           "@/*": ["./src/*"]
+         }
+       }
+     }
+     ```
+
+  5. vite.config.ts:
+     ```typescript
+     import path from "path"
+     import react from "@vitejs/plugin-react"
+     import { defineConfig } from "vite"
+     
+     export default defineConfig({
+       plugins: [react()],
+       resolve: {
+         alias: {
+           "@": path.resolve(__dirname, "./src"),
+         },
+       },
+     })
+     ```
+
+  6. components.json:
+     ```json
+     {
+       "$schema": "https://ui.shadcn.com/schema.json",
+       "style": "new-york",
+       "tailwind": {
+         // configuration will be added by shadcn init
+       },
+       "aliases": {
+         "components": "@/components",
+         "utils": "@/lib/utils",
+         "ui": "@/components/ui",
+         "lib": "@/lib",
+         "hooks": "@/hooks"
+       }
+     }
+     ```
+
+  All imports should use the configured aliases (example):
+  ```typescript
+  import { Button } from "@/components/ui/button"
+  import { Card } from "@/components/ui/card"
+  import { Input } from "@/components/ui/input"
+  import { Label } from "@/components/ui/label"
+  ```
 Your response should be strictky only code and that too in following JSON format::
 {{
     "folders": ["list of folders to create"],
     "files": {{
         "path/to/file": "file content"  
     }},
-    "commands": ["list of commands to run"] 
+    "commands": ["list of commands to run"],
+    "post_creation_commands": ["list of commands to run after file creation"]
 }}
 """
 
@@ -386,4 +737,8 @@ def get_code_generation_prompts(version: str, backend_template: str = None, fron
                 "{frontend_code_templates}", frontend_template
             )
     
-    return prompts 
+    return prompts
+
+
+
+    

@@ -1,0 +1,240 @@
+Frontend Templates
+
+1. React Component Template (TypeScript)
+```tsx
+// File: {file_path}
+
+import { FC } from 'react'
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+interface {ComponentName}Props {
+  // Props interface
+}
+
+export const {ComponentName}: FC<{ComponentName}Props> = () => {
+  return (
+    <Card className="p-6">
+      <div className="space-y-4">
+        <Label>Label Example</Label>
+        <Input placeholder="Input example" />
+        <Button>Button Example</Button>
+      </div>
+    </Card>
+  )
+}
+```
+
+2. tRPC API Route Template
+```ts
+// File: {file_path}
+
+import { router, publicProcedure } from '../trpc'
+import { z } from 'zod'
+
+export const {routeName}Router = router({
+  // Define procedures with Zod validation
+  create: publicProcedure
+    .input(z.object({
+      // Input validation schema
+    }))
+    .mutation(async ({ input, ctx }) => {
+      // Procedure implementation
+    }),
+
+  get: publicProcedure
+    .input(z.object({
+      // Input validation schema
+    }))
+    .query(async ({ input, ctx }) => {
+      // Procedure implementation
+    }),
+})
+```
+
+3. Page Layout Template
+```tsx
+// File: {file_path}
+
+import { FC, PropsWithChildren } from 'react'
+
+interface {LayoutName}Props extends PropsWithChildren {
+  // Additional props
+}
+
+export const {LayoutName}: FC<{LayoutName}Props> = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto py-6">
+        {children}
+      </main>
+    </div>
+  )
+}
+```
+
+4. Store Template (Zustand)
+```ts
+// File: {file_path}
+
+import { create } from 'zustand'
+
+interface {StoreName}State {
+  // State interface
+}
+
+interface {StoreName}Actions {
+  // Actions interface
+}
+
+export const use{StoreName}Store = create<{StoreName}State & {StoreName}Actions>((set) => ({
+  // Initial state
+  
+  // Actions
+}))
+```
+
+Code Generation Rules:
+1. All components must be TypeScript files (.tsx for components, .ts for utilities)
+2. Use named exports instead of default exports
+3. Use Shadcn UI components with proper imports from "@/components/ui"
+4. Style using Tailwind CSS classes
+5. Use proper type annotations for all props and state
+6. Follow the path alias pattern (@/) for imports
+7. Use tRPC for API communication instead of REST/Axios
+8. Implement proper error boundaries and loading states
+9. Use Zustand for state management
+10. Keep components small and focused on a single responsibility
+
+File Structure:
+```
+src/
+├── components/
+│   ├── ui/          # Shadcn components
+│   └── {feature}/   # Feature-specific components
+├── lib/
+│   └── utils.ts     # Utility functions
+├── server/
+│   └── trpc/        # tRPC routers and procedures
+├── store/           # Zustand stores
+└── pages/           # Route pages
+```
+
+Configuration Files:
+
+1. tsconfig.json
+```json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+2. tailwind.config.js
+```js
+/** @type {import('tailwindcss').Config} */
+const config = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+    },
+  },
+  plugins: ["tailwindcss-animate"],
+}
+
+export default config
+```
+
+3. vite.config.ts
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
+```

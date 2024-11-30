@@ -16,13 +16,18 @@ def create_code_chains(
 ) -> dict:
     """Create code generation chains based on version configuration."""
     try:
-        # Load and process templates if provided
-        if backend_template:
-            backend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'backend.txt')
-            backend_template = load_template(backend_template)
-        if frontend_template:
-            frontend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'frontend.txt')
-            frontend_template = load_template(frontend_template)
+        # Only load templates if they're provided and we're using v3
+        if code_version == "v3":
+            if backend_template:
+                #backend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'backend.txt')
+                backend_template = load_template(backend_template)
+            if frontend_template:
+                #frontend_template = os.path.join(os.path.dirname(__file__), '..', '..', 'templates', 'frontend.txt')
+                frontend_template = load_template(frontend_template)
+        else:
+            # For v1 and v2, ignore any template arguments
+            backend_template = None
+            frontend_template = None
             
         # Get prompts for the specified version
         prompts = get_code_generation_prompts(
@@ -45,4 +50,4 @@ def create_code_chains(
 
     except Exception as e:
         logger.error(f"Error creating code generation chains: {str(e)}")
-        raise 
+        raise
