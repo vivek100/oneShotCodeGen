@@ -80,7 +80,7 @@ We also have different versions of prompts for you to try out and see which lead
 - Support for both OpenAI and Anthropic models
 - Flexible code generation strategies:
   - use our test pipeline config to create full project
-  - Create your own prompot chaings by adding/removing steps in pipeline config
+  - Create your own prompt chains by adding/removing steps in pipeline config
 - Rich console output with progress tracking
 - Organized project structure with documentation, all files are created in a separate folder called "/generated_project"
 
