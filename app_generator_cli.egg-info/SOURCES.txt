@@ -1,0 +1,7 @@
+setup.py
+app_generator_cli.egg-info/PKG-INFO
+app_generator_cli.egg-info/SOURCES.txt
+app_generator_cli.egg-info/dependency_links.txt
+app_generator_cli.egg-info/entry_points.txt
+app_generator_cli.egg-info/requires.txt
+app_generator_cli.egg-info/top_level.txt

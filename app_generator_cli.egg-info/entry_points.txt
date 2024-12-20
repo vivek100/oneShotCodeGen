@@ -1,0 +1,2 @@
+[console_scripts]
+generate-app = src.cli:app

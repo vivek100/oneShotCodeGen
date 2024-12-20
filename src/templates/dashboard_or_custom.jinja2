@@ -1,0 +1,73 @@
+import React from "react";
+import { Grid } from "@mui/material";
+import Card from "../components/Card";
+import Chart from "../components/Chart";
+import Table from "../components/Table";
+import Button from "../components/Button";
+import Modal from "../components/Modal";
+import Form from "../components/Form";
+import { Title } from "react-admin";
+
+const {{ page.name.replace(' ', '') }} = () => {
+  return (
+    <div {% raw %}style={{ padding: '1rem' }}{% endraw %}>
+      <Title title="{{ page.name }}" />
+      {% for zone in page.zones %}
+      <Grid container spacing={% raw %}{{% endraw %}{{ zone.layout.spacing }}{% raw %}}{% endraw %} columns={% raw %}{{% endraw %}{{ zone.layout.columns }}{% raw %}}{% endraw %}>
+        {% for component in zone.components %}
+        <Grid item xs={12} md={6}>
+          {% if component.type == "card" %}
+          <Card
+            name="{{ component.name }}"
+            provider="{{ component.provider }}"
+            title="{{ component.title }}"
+            column="{{ component.column }}"
+            operation="{{ component.operation }}"
+            icon="{{ component.icon if component.icon else '' }}"
+            color="{{ component.color if component.color else '#ffffff' }}"
+          />
+          {% elif component.type == "chart" %}
+          <Chart
+            name="{{ component.name }}"
+            provider="{{ component.provider }}"
+            chartType="{{ component.chart_type }}"
+            config={% raw %}{{% endraw %}{{ component.config | tojson }}{% raw %}}{% endraw %}
+            size={% raw %}{{% endraw %}{{ component.size | tojson if component.size else {'width': 400, 'height': 300} | tojson }}{% raw %}}{% endraw %}
+          />
+          {% elif component.type == "table" %}
+          <Table
+            name="{{ component.name }}"
+            provider="{{ component.provider }}"
+            cols={% raw %}{{% endraw %}{{ component.cols | tojson }}{% raw %}}{% endraw %}
+            actions={% raw %}{{% endraw %}{{ component.actions | tojson if component.actions else [] | tojson }}{% raw %}}{% endraw %}
+          />
+          {% elif component.type == "button" %}
+          <Button
+            name="{{ component.name }}"
+            label="{{ component.label }}"
+            action={% raw %}{{% endraw %}{{ component.action | tojson }}{% raw %}}{% endraw %}
+            variant="{{ component.variant if component.variant else 'contained' }}"
+          />
+          {% elif component.type == "modal" %}
+          <Modal
+            name="{{ component.name }}"
+            title="{{ component.title }}"
+            content={% raw %}{{% endraw %}{{ component.content | tojson }}{% raw %}}{% endraw %}
+          />
+          {% elif component.type == "form" %}
+          <Form
+            name="{{ component.name }}"
+            provider="{{ component.provider }}"
+            fields={% raw %}{{% endraw %}{{ component.fields | tojson }}{% raw %}}{% endraw %}
+            submit="{{ component.submit }}"
+          />
+          {% endif %}
+        </Grid>
+        {% endfor %}
+      </Grid>
+      {% endfor %}
+    </div>
+  );
+};
+
+export default {{ page.name.replace(' ', '') }};

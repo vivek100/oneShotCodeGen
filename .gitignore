@@ -1,0 +1,11 @@
+#ignore all files in the output folder
+output/
+#ignore all files in the .env file
+.env
+#ignore all files in the venv folder
+venv/
+#ignore app-generator-cli.egg-info folder
+app-generator-cli.egg-info
+#ignore all files in the .gitignore file
+.gitignore
+

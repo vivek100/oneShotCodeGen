@@ -1,0 +1,38 @@
+import React from "react";
+import { Edit, SimpleForm, TextInput, SelectInput, useGetList } from "react-admin";
+
+const {{ resource.name.replace(' ', '') }}Edit = () => {
+  {% for field in resource.edit_fields %}
+  {% if field.type == "select" and field.select_type == "dynamic" %}
+  const { data: {{ field.field }}Options } = useGetList("{{ field.provider }}", {
+    pagination: { page: 1, perPage: 100 },
+  });
+  {% endif %}
+  {% endfor %}
+
+  return (
+    <Edit>
+      <SimpleForm>
+        {% for field in resource.edit_fields %}
+        {% if field.type == "select" %}
+        <SelectInput 
+          source="{{ field.field }}"
+          {% if field.select_type == "dynamic" %}
+          {% raw %}choices={{% endraw %}{{ field.field }}Options?.map(record => ({
+            id: record.{{ field.value_field }},
+            name: record.{{ field.label_field }}
+          })) || []}
+          {% else %}
+          choices={% raw %}{{% endraw %}{{ field.select_options | tojson }}{% raw %}}{% endraw %}
+          {% endif %}
+        />
+        {% else %}
+        <TextInput source="{{ field.field }}" type="{{ field.type }}" />
+        {% endif %}
+        {% endfor %}
+      </SimpleForm>
+    </Edit>
+  );
+};
+
+export default {{ resource.name.replace(' ', '') }}Edit;

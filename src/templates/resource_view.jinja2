@@ -1,0 +1,18 @@
+import React from "react";
+import { Show, SimpleShowLayout, TextField, DateField } from "react-admin";
+
+const {{ resource.name.replace(' ', '') }}View = () => (
+  <Show>
+    <SimpleShowLayout>
+      {% for field in resource.view_fields %}
+      {% if field.type == "date" %}
+      <DateField source="{{ field.field }}" />
+      {% else %}
+      <TextField source="{{ field.field }}" />
+      {% endif %}
+      {% endfor %}
+    </SimpleShowLayout>
+  </Show>
+);
+
+export default {{ resource.name.replace(' ', '') }}View;

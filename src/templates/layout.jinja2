@@ -1,0 +1,44 @@
+import * as React from "react";
+import { Layout, Menu, MenuItemLink } from "react-admin";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import BookIcon from "@mui/icons-material/Book";
+import CategoryIcon from "@mui/icons-material/Category";
+import MoneyIcon from "@mui/icons-material/AttachMoney";
+import { useLocation } from "react-router-dom";
+
+const CustomMenu = (props) => {
+  const location = useLocation();
+
+  return (
+    <Menu {...props}>
+      {% for page in pages %}
+        {% if page.type == "dashboard" %}
+        <MenuItemLink
+          to="/"
+          primaryText="{{ page.name }}"
+          leftIcon={<DashboardIcon />}
+          selected={location.pathname === "/"}
+        />
+        {% elif page.type == "resource" %}
+        <MenuItemLink
+          to="/{{ page.resource }}"
+          primaryText="{{ page.name }}"
+          leftIcon={<BookIcon />}
+          selected={location.pathname.startsWith("/{{ page.resource }}")}
+        />
+        {% elif page.type == "custom" %}
+        <MenuItemLink
+          to="/{{ page.name|lower|replace(' ', '-') }}"
+          primaryText="{{ page.name }}"
+          leftIcon={<CategoryIcon />}
+          selected={location.pathname.startsWith("/{{ page.name|lower|replace(' ', '-') }}")}
+        />
+        {% endif %}
+      {% endfor %}
+    </Menu>
+  );
+};
+
+const CustomLayout = (props) => <Layout {...props} menu={CustomMenu} />;
+
+export default CustomLayout;

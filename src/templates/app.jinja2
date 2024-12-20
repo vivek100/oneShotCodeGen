@@ -1,0 +1,44 @@
+import React from "react";
+import { Admin, Resource, CustomRoutes, Authenticated } from "react-admin";
+import { Route } from "react-router-dom";
+import { dataProvider } from "./providers/dataProvider";
+import { authProvider } from "./providers/authProvider";
+import Dashboard from "./pages/Dashboard";
+import CustomLayout from "./layout";
+{% for page in pages %}
+import {{ page.name.replace(' ', '') }} from "./pages/{{ page.name.replace(' ', '') }}";
+{% endfor %}
+{% for resource in resources %}
+import {{ resource.name.replace(' ', '') }}List from "./pages/{{ resource.name.replace(' ', '') }}List";
+import {{ resource.name.replace(' ', '') }}View from "./pages/{{ resource.name.replace(' ', '') }}View";
+import {{ resource.name.replace(' ', '') }}Edit from "./pages/{{ resource.name.replace(' ', '') }}Edit";
+import {{ resource.name.replace(' ', '') }}Create from "./pages/{{ resource.name.replace(' ', '') }}Create";
+{% endfor %}
+
+const App = () => (
+  <Admin 
+    dashboard={Dashboard}
+    dataProvider={dataProvider}
+    authProvider={authProvider}
+    layout={CustomLayout}
+  >
+    {% for resource in resources %}
+    <Resource
+      name="{{ resource.resource }}"
+      list={ {{ resource.name.replace(' ', '') }}List }
+      show={ {{ resource.name.replace(' ', '') }}View }
+      edit={ {{ resource.name.replace(' ', '') }}Edit }
+      create={ {{ resource.name.replace(' ', '') }}Create }
+    />
+    {% endfor %}
+    {%- if pages -%}
+    <CustomRoutes>
+      {%- for page in pages %}
+      <Route path="/{{ page.name.replace(' ', '').lower() }}" element={<Authenticated><{{ page.name.replace(' ', '') }} /></Authenticated>} />
+      {%- endfor %}
+    </CustomRoutes>
+    {%- endif -%}
+  </Admin>
+);
+
+export default App;
