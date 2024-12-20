@@ -4,7 +4,7 @@ A command-line interface tool for generating full-stack applications with React 
 
 ## Updates
 
-- 2024-12-20(reduced token usage by 70% and accuracy by 80%):
+- 2024-12-20(reduced token usage by 70% and accuracy increased by 80%, works with smaller models like gpt-4o-mini):
     - Integrated with outlines to generate the structured output, this uses a method where logits are assigned low or zero probability to the tokens that are not part of the output, this is done right before the token is generated. This enables the tool to get higher accuracy output with smaller models
     - The structured output is then used to generate the frontend and backend code which sort of like configuration files, this helps in generating the code with less tokens
         - The DB output is a json of entities and their relationships, this is used to generate the SQL queries via python code and run the sql to create tables and views on supabase
