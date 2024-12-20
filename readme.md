@@ -42,7 +42,11 @@ SUPABASE_PROJECT_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_DB_PASSWORD=your_db_password
 ```
-
+Make sure following permissions are set for frontend to run aggregate queries:
+``` sql
+ALTER ROLE authenticator SET pgrst.db_aggregates_enabled = 'true';
+NOTIFY pgrst, 'reload config';
+```
 
 2. Generate an application:
 
