@@ -28,10 +28,10 @@ const CustomMenu = (props) => {
         />
         {% elif page.type == "custom" %}
         <MenuItemLink
-          to="/{{ page.name|lower|replace(' ', '-') }}"
+          to="/{{ page.name }}"
           primaryText="{{ page.name }}"
           leftIcon={<CategoryIcon />}
-          selected={location.pathname.startsWith("/{{ page.name|lower|replace(' ', '-') }}")}
+          selected={location.pathname.startsWith("/{{ page.name }}")}
         />
         {% endif %}
       {% endfor %}

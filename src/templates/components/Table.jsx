@@ -11,6 +11,9 @@ import {
 
 const Table = ({ name, provider, cols, actions }) => {
   const getFieldComponent = (type) => {
+    // Add safety check for undefined type
+    if (!type) return TextField;  // Default to TextField if type is undefined
+    
     switch(type.toLowerCase()) {
       case 'number':
       case 'float':
@@ -27,8 +30,8 @@ const Table = ({ name, provider, cols, actions }) => {
   return (
     <List resource={provider}>
       <Datagrid>
-        {cols.map(col => {
-          const FieldComponent = getFieldComponent(col.type);
+        {cols?.map(col => {  // Add optional chaining here too
+          const FieldComponent = getFieldComponent(col?.type);
           return <FieldComponent key={col.field} source={col.field} label={col.header} />;
         })}
         {actions?.includes('edit') && <EditButton />}

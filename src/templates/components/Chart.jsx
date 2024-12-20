@@ -1,6 +1,16 @@
-// Chart.jsx
 import React, { useState, useEffect } from "react";
-import { BarChart, LineChart, PieChart, Bar, Line, Pie, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  Bar,
+  Line,
+  Pie,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { Typography, Paper } from "@mui/material";
 import { dataProvider } from "../providers/dataProvider";
 
@@ -16,13 +26,13 @@ const Chart = ({ name, provider, chartType, config, size }) => {
         setError(null);
         const { data: result } = await dataProvider.getAll(provider);
         if (!result || result.length === 0) {
-          setError('No data available');
+          setError("No data available");
           return;
         }
         setData(result);
       } catch (error) {
-        console.error('Error loading chart data:', error);
-        setError(error.message || 'Failed to load data');
+        console.error("Error loading chart data:", error);
+        setError(error.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -32,7 +42,15 @@ const Chart = ({ name, provider, chartType, config, size }) => {
 
   if (loading) {
     return (
-      <Paper style={{ height: size?.height || 300, display: 'flex', alignItems: 'center', justifyContent: 'center',margin: '1rem 0' }}>
+      <Paper
+        style={{
+          height: size?.height || 300,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "1rem 0",
+        }}
+      >
         <Typography variant="body1">Loading chart data...</Typography>
       </Paper>
     );
@@ -40,49 +58,65 @@ const Chart = ({ name, provider, chartType, config, size }) => {
 
   if (error || data.length === 0) {
     return (
-      <Paper style={{ 
-        height: size?.height || 300, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        backgroundColor: 'grey',
-        margin: '1rem 0'
-      }}>
-        <Typography 
-          variant="body1" 
+      <Paper
+        style={{
+          height: size?.height || 300,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "grey",
+          margin: "1rem 0",
+        }}
+      >
+        <Typography
+          variant="body1"
           color="textSecondary"
-          style={{ textAlign: 'center', padding: '1rem' }}
+          style={{ textAlign: "center", padding: "1rem" }}
         >
-          {error || 'No data available to display'}
+          {error || "No data available to display"}
         </Typography>
       </Paper>
     );
   }
 
-  const ChartComponent =
-    chartType === "bar" ? BarChart : chartType === "line" ? LineChart : PieChart;
-
   return (
-    <ResponsiveContainer width={size?.width || "100%"} height={size?.height || 300}>
-      <ChartComponent data={data}>
-        <XAxis dataKey={config.x} />
-        <YAxis />
-        <Tooltip />
-        {chartType === "bar" && <Bar dataKey={config.y} fill="#8884d8" />}
-        {chartType === "line" && <Line dataKey={config.y} stroke="#8884d8" />}
-        {chartType === "pie" && (
-          <Pie 
-            dataKey={config.y} 
-            data={data} 
-            cx="50%" 
-            cy="50%" 
-            outerRadius={80} 
-            fill="#8884d8"
-            label
-          />
+    <Paper style={{ margin: "1rem 0", padding: "1rem" }}>
+      <Typography variant="h6" gutterBottom>
+        {name}
+      </Typography>
+      <ResponsiveContainer width={ "100%"} height={ 400}>
+        {chartType === "bar" && (
+          <BarChart data={data}>
+            <XAxis dataKey={config.x} />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey={config.y} fill="#8884d8" />
+          </BarChart>
         )}
-      </ChartComponent>
-    </ResponsiveContainer>
+        {chartType === "line" && (
+          <LineChart data={data}>
+            <XAxis dataKey={config.x} />
+            <YAxis />
+            <Tooltip />
+            <Line dataKey={config.y} stroke="#8884d8" />
+          </LineChart>
+        )}
+        {chartType === "pie" && (
+          <PieChart>
+            <Tooltip />
+            <Pie
+              dataKey={config.y}
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              fill="#8884d8"
+              label
+            />
+          </PieChart>
+        )}
+      </ResponsiveContainer>
+    </Paper>
   );
 };
 

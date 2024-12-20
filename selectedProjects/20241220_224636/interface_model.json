@@ -1,0 +1,315 @@
+{
+  "pages": [
+    {
+      "type": "dashboard",
+      "name": "Dashboard",
+      "desc": "Overview of job applications management",
+      "zones": [
+        {
+          "name": "Application Summary",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "card",
+              "name": "TotalApplications",
+              "provider": "job_applications",
+              "title": "Total Applications",
+              "column": "id",
+              "operation": "count",
+              "icon": "assignment",
+              "color": "#2196f3"
+            },
+            {
+              "type": "card",
+              "name": "CategoriesCount",
+              "provider": "categories",
+              "title": "Total Categories",
+              "column": "id",
+              "operation": "count",
+              "icon": "category",
+              "color": "#ff9800"
+            },
+            {
+              "type": "chart",
+              "name": "ApplicationStatusBreakdown",
+              "provider": "job_applications",
+              "chart_type": "pie",
+              "config": {
+                "x": "status",
+                "y": "COUNT(id)"
+              },
+              "size": {
+                "width": "100%",
+                "height": "400px"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Job Applications",
+      "resource": "job_applications",
+      "provider": "job_applications",
+      "filters": null,
+      "create_fields": [
+        {
+          "field": "job_title",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "company_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "application_date",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "status",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "static",
+              "select_options": [
+                {
+                  "label": "Applied",
+                  "value": "applied"
+                },
+                {
+                  "label": "Interview",
+                  "value": "interview"
+                },
+                {
+                  "label": "Offer",
+                  "value": "offer"
+                },
+                {
+                  "label": "Rejected",
+                  "value": "rejected"
+                }
+              ],
+              "provider": null,
+              "value_field": null,
+              "label_field": null
+            }
+          ]
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "dynamic",
+              "select_options": null,
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "job_title",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "company_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "application_date",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "status",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "static",
+              "select_options": [
+                {
+                  "label": "Applied",
+                  "value": "applied"
+                },
+                {
+                  "label": "Interview",
+                  "value": "interview"
+                },
+                {
+                  "label": "Offer",
+                  "value": "offer"
+                },
+                {
+                  "label": "Rejected",
+                  "value": "rejected"
+                }
+              ],
+              "provider": null,
+              "value_field": null,
+              "label_field": null
+            }
+          ]
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "dynamic",
+              "select_options": null,
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "job_title",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "company_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "application_date",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "status",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "job_title",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "company_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "application_date",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "status",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_actions": [
+        {
+          "type": "edit"
+        },
+        {
+          "type": "delete"
+        },
+        {
+          "type": "view"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "name": "Manage Job Categories",
+      "desc": "Create, edit, and manage job categories",
+      "zones": [
+        {
+          "name": "Job Categories",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "table",
+              "name": "CategoriesList",
+              "provider": "categories",
+              "cols": [
+                {
+                  "field": "name",
+                  "header": "Category Name"
+                },
+                {
+                  "field": "description",
+                  "header": "Description"
+                }
+              ],
+              "actions": [
+                "edit",
+                "delete"
+              ]
+            },
+            {
+              "type": "btn",
+              "name": "AddCategory",
+              "label": "Add Category",
+              "action": {
+                "type": "nav",
+                "url": "/categories/new",
+                "modal": null
+              },
+              "variant": "contained"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "view_name": "application_status_summary",
+      "source_tables": [
+        "job_applications"
+      ],
+      "columns": [
+        {
+          "name": "status",
+          "transformation": "status"
+        },
+        {
+          "name": "count",
+          "transformation": "COUNT(id)"
+        }
+      ],
+      "group_by": [
+        "status"
+      ],
+      "filters": "TRUE",
+      "description": "Summary view of job application statuses"
+    }
+  ]
+}

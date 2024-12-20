@@ -82,7 +82,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
         - `fields`: Form field definitions
           - if the field is a select field and the options are dynamic, then the field should be defined as a select field and the options should be defined in the options field
           - Example1 provider/dynamic version : `{ "field": "category_id", "type": "select", "select_type": "dynamic","provider": "categories", "label_field": "name", "value_field": "id" }`
-          - Example2 json /static version : `{ "field": "category_id", "type": "select", "select_type": "static", "select_options": [{"label": "Category 1", "value": "1"}, {"label": "Category 2", "value": "2"}] }`
+          - Example2 json /static version : `{ "field": "category_id", "type": "select", "select_type": "static", "select_options": [{"id": "1", "name": "Category 1", "value": "1"}, {"id": "2", "name": "Category 2", "value": "2"}] }`
         - `submit`: Action type ("create" or "update")
       - Example: `{ "type": "form", "name": "ExpenseForm", "provider": "expenses", "fields": [{"field": "amount", "type": "number"}], "submit": "create" }`
     
@@ -141,7 +141,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
          - `view_fields`: View fields
          For both create and edit fields, if the field is a select field and the options are dynamic, then the field should be defined as a select field and the options should be defined in the options field
           - Example1 provider/dynamic version : `{ "field": "category_id", "type": "select", "select_type": "dynamic","provider": "categories", "label_field": "name", "value_field": "id" }`
-          - Example2 json /static version : `{ "field": "category_id", "type": "select", "select_type": "static", "select_options": [{"label": "Category 1", "value": "1"}, {"label": "Category 2", "value": "2"}] }`
+          - Example2 json /static version : `{ "field": "category_id", "type": "select", "select_type": "static", "select_options": [{"id": "1", "name": "Category 1", "value": "1"}, {"id": "2", "name": "Category 2", "value": "2"}] }`
 
     """
     view_info = """

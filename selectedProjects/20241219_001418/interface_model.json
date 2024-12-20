@@ -1,0 +1,341 @@
+{
+  "pages": [
+    {
+      "type": "dashboard",
+      "name": "Dashboard",
+      "desc": "Overview of expenses",
+      "zones": [
+        {
+          "name": "Expense Summary",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "card",
+              "name": "TotalExpenses",
+              "provider": "expenses",
+              "title": "Total Expenses",
+              "column": "amount",
+              "operation": "sum",
+              "icon": "attach_money",
+              "color": "#4caf50"
+            },
+            {
+              "type": "chart",
+              "name": "MonthlyTrend",
+              "provider": "monthly_expenses",
+              "chart_type": "line",
+              "config": {
+                "x": "month",
+                "y": "total_expenses"
+              },
+              "size": {
+                "width": 600,
+                "height": 400
+              }
+            }
+          ]
+        },
+        {
+          "name": "Categories Breakdown",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "card",
+              "name": "ExpenseCategoryCount",
+              "provider": "categories",
+              "title": "Expense Categories",
+              "column": "id",
+              "operation": "count",
+              "icon": "category",
+              "color": "#3f51b5"
+            },
+            {
+              "type": "chart",
+              "name": "CategoryDistribution",
+              "provider": "category_totals",
+              "chart_type": "pie",
+              "config": {
+                "x": "category_name",
+                "y": "total_amount"
+              },
+              "size": {
+                "width": 400,
+                "height": 400
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Expenses",
+      "resource": "expenses",
+      "provider": "expenses",
+      "filters": [
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "type": "dynamic",
+              "options": {
+                "provider": "categories",
+                "value_field": "id",
+                "label_field": "name"
+              },
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "create_fields": [
+        {
+          "field": "amount",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "type": "dynamic",
+              "options": {
+                "provider": "categories",
+                "value_field": "id",
+                "label_field": "name"
+              },
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "amount",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "type": "dynamic",
+              "options": {
+                "provider": "categories",
+                "value_field": "id",
+                "label_field": "name"
+              },
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "amount",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "type": "dynamic",
+              "options": {
+                "provider": "categories",
+                "value_field": "id",
+                "label_field": "name"
+              },
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "amount",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "category_id",
+          "type": "select",
+          "options": [
+            {
+              "type": "dynamic",
+              "options": {
+                "provider": "categories",
+                "value_field": "id",
+                "label_field": "name"
+              },
+              "provider": "categories",
+              "value_field": "id",
+              "label_field": "name"
+            }
+          ]
+        }
+      ],
+      "list_actions": [
+        {
+          "type": "button",
+          "name": "EditExpense",
+          "label": "Edit",
+          "action": {
+            "type": "nav",
+            "url": "/expenses/edit"
+          },
+          "variant": "outlined"
+        },
+        {
+          "type": "button",
+          "name": "DeleteExpense",
+          "label": "Delete",
+          "action": {
+            "type": "modal",
+            "modal": "deleteExpense"
+          },
+          "variant": "outlined"
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Categories",
+      "resource": "categories",
+      "provider": "categories",
+      "filters": null,
+      "create_fields": [
+        {
+          "field": "name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "description",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "description",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "description",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "description",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_actions": [
+        {
+          "type": "button",
+          "name": "EditCategory",
+          "label": "Edit",
+          "action": {
+            "type": "nav",
+            "url": "/categories/edit"
+          },
+          "variant": "outlined"
+        },
+        {
+          "type": "button",
+          "name": "DeleteCategory",
+          "label": "Delete",
+          "action": {
+            "type": "modal",
+            "modal": "deleteCategory"
+          },
+          "variant": "outlined"
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "view_name": "monthly_expenses",
+      "source_tables": [
+        "expenses e"
+      ],
+      "columns": [
+        {
+          "name": "month",
+          "transformation": "DATE_TRUNC('month', e.created_at)"
+        },
+        {
+          "name": "total_expenses",
+          "transformation": "SUM(e.amount)"
+        }
+      ],
+      "group_by": [
+        "DATE_TRUNC('month', e.created_at)"
+      ],
+      "filters": "e.created_at IS NOT NULL",
+      "description": "Aggregates total expenses per month"
+    },
+    {
+      "view_name": "category_totals",
+      "source_tables": [
+        "expenses e JOIN categories c ON e.category_id = c.id"
+      ],
+      "columns": [
+        {
+          "name": "category_name",
+          "transformation": "c.name"
+        },
+        {
+          "name": "total_amount",
+          "transformation": "SUM(e.amount)"
+        }
+      ],
+      "group_by": [
+        "c.name"
+      ],
+      "filters": "c.name IS NOT NULL",
+      "description": "Aggregates total expenses by category"
+    }
+  ]
+}

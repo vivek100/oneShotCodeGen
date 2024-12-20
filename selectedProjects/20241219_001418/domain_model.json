@@ -1,0 +1,319 @@
+{
+  "title": "Expense Tracker",
+  "description": "Application to track personal and business expenses",
+  "use_cases": [
+    {
+      "name": "Track Expenses",
+      "description": "Record and categorize daily expenses"
+    },
+    {
+      "name": "View Expense Reports",
+      "description": "Generate reports to view expenses over various time periods"
+    },
+    {
+      "name": "Manage Expense Categories",
+      "description": "Add, update, or delete expense categories"
+    }
+  ],
+  "entities": [
+    {
+      "name": "expenses",
+      "description": "Stores expense records",
+      "columns": {
+        "headers": [
+          "name",
+          "data_type",
+          "is_primary",
+          "is_nullable",
+          "is_unique",
+          "default",
+          "auto_increment",
+          "is_foreign",
+          "foreign_table",
+          "foreign_column",
+          "on_delete",
+          "on_update"
+        ],
+        "rows": [
+          [
+            "id",
+            "uuid",
+            true,
+            false,
+            true,
+            "gen_random_uuid()",
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "amount",
+            "float",
+            false,
+            false,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "category_id",
+            "uuid",
+            false,
+            false,
+            false,
+            null,
+            false,
+            true,
+            "categories",
+            "id",
+            "CASCADE",
+            "CASCADE"
+          ],
+          [
+            "user_id",
+            "uuid",
+            false,
+            false,
+            false,
+            null,
+            false,
+            true,
+            "profiles",
+            "id",
+            "CASCADE",
+            "CASCADE"
+          ]
+        ]
+      },
+      "relationships": {
+        "headers": [
+          "entity",
+          "type",
+          "description"
+        ],
+        "rows": [
+          [
+            "categories",
+            "many-to-one",
+            "Each expense belongs to one category"
+          ],
+          [
+            "profiles",
+            "many-to-one",
+            "Each expense belongs to one user"
+          ]
+        ]
+      },
+      "indexes": {
+        "headers": [
+          "name",
+          "columns",
+          "is_unique",
+          "is_full_text"
+        ],
+        "rows": [
+          [
+            "idx_expense_category",
+            "category_id",
+            false,
+            false
+          ],
+          [
+            "idx_expense_user",
+            "user_id",
+            false,
+            false
+          ]
+        ]
+      },
+      "composite_primary_keys": null,
+      "composite_unique_constraints": null,
+      "check_constraints": [
+        "amount >= 0"
+      ],
+      "partition_by": null
+    },
+    {
+      "name": "categories",
+      "description": "Stores expense categories",
+      "columns": {
+        "headers": [
+          "name",
+          "data_type",
+          "is_primary",
+          "is_nullable",
+          "is_unique",
+          "default",
+          "auto_increment",
+          "is_foreign",
+          "foreign_table",
+          "foreign_column",
+          "on_delete",
+          "on_update"
+        ],
+        "rows": [
+          [
+            "id",
+            "uuid",
+            true,
+            false,
+            true,
+            "gen_random_uuid()",
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "name",
+            "varchar",
+            false,
+            false,
+            true,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "description",
+            "text",
+            false,
+            true,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "relationships": {
+        "headers": [
+          "entity",
+          "type",
+          "description"
+        ],
+        "rows": []
+      },
+      "indexes": {
+        "headers": [
+          "name",
+          "columns",
+          "is_unique",
+          "is_full_text"
+        ],
+        "rows": [
+          [
+            "idx_category_name",
+            "name",
+            true,
+            false
+          ]
+        ]
+      },
+      "composite_primary_keys": null,
+      "composite_unique_constraints": null,
+      "check_constraints": null,
+      "partition_by": null
+    }
+  ],
+  "mock_users": [
+    {
+      "records": {
+        "headers": [
+          "email",
+          "password",
+          "role"
+        ],
+        "rows": [
+          [
+            "admin@example.com",
+            "admin123",
+            "admin"
+          ],
+          [
+            "user@example.com",
+            "user123",
+            "user"
+          ]
+        ]
+      }
+    }
+  ],
+  "mock_data": [
+    {
+      "entity_name": "expenses",
+      "records": {
+        "headers": [
+          "id",
+          "amount",
+          "category_id",
+          "user_id"
+        ],
+        "rows": [
+          [
+            "uuid-1",
+            100.5,
+            "cat-1",
+            "admin@example.com"
+          ],
+          [
+            "uuid-2",
+            50.25,
+            "cat-2",
+            "user@example.com"
+          ],
+          [
+            "uuid-3",
+            75.0,
+            "cat-1",
+            "user@example.com"
+          ]
+        ]
+      },
+      "dependencies": [
+        "categories"
+      ]
+    },
+    {
+      "entity_name": "categories",
+      "records": {
+        "headers": [
+          "id",
+          "name",
+          "description"
+        ],
+        "rows": [
+          [
+            "cat-1",
+            "Food",
+            "Expenses related to food and dining"
+          ],
+          [
+            "cat-2",
+            "Transport",
+            "Transport-related expenses"
+          ]
+        ]
+      },
+      "dependencies": []
+    }
+  ]
+}

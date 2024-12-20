@@ -5,8 +5,8 @@ A command-line interface tool for generating full-stack applications with React 
 ## Updates
 
 - 2024-12-20(reduced token usage by 70% and accuracy by 80%):
-    - Integrated with outlines to generate the structured ouput, this uses a method where logits are assigned low por zero probability to the tokens that are not part of the output, this enables the tool to get higheraccuracy with smaller models
-    - The structured output is then used to generate the frontend and backend code 
+    - Integrated with outlines to generate the structured output, this uses a method where logits are assigned low or zero probability to the tokens that are not part of the output, this is done right before the token is generated. This enables the tool to get higher accuracy output with smaller models
+    - The structured output is then used to generate the frontend and backend code which sort of like configuration files, this helps in generating the code with less tokens
         - The DB output is a json of entities and their relationships, this is used to generate the SQL queries via python code and run the sql to create tables and views on supabase
         - The frontend structured output is structured around react admin and the components, this is used to generate the frontend code using jinja2 templates
         - Backend is simulated using supabase js client via dataproviders
@@ -49,7 +49,11 @@ SUPABASE_DB_PASSWORD=your_db_password
 ``` bash
 python -m src.cli "Create an expense tracker app"
 ```
-
+Once generated, you can run the frontend by running `npm start` in the frontend directory:
+``` bash
+cd output/{output_folder_name}/frontend
+npm start
+```
 
 ## Project Structure
 ``` bash

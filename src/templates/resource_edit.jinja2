@@ -3,8 +3,8 @@ import { Edit, SimpleForm, TextInput, SelectInput, useGetList } from "react-admi
 
 const {{ resource.name.replace(' ', '') }}Edit = () => {
   {% for field in resource.edit_fields %}
-  {% if field.type == "select" and field.select_type == "dynamic" %}
-  const { data: {{ field.field }}Options } = useGetList("{{ field.provider }}", {
+  {% if field.type == "select" and field.options[0].select_type == "dynamic" %}
+  const { data: {{ field.field }}Options } = useGetList("{{ field.options[0].provider }}", {
     pagination: { page: 1, perPage: 100 },
   });
   {% endif %}
@@ -17,14 +17,17 @@ const {{ resource.name.replace(' ', '') }}Edit = () => {
         {% if field.type == "select" %}
         <SelectInput 
           source="{{ field.field }}"
-          {% if field.select_type == "dynamic" %}
-          {% raw %}choices={{% endraw %}{{ field.field }}Options?.map(record => ({
-            id: record.{{ field.value_field }},
-            name: record.{{ field.label_field }}
+          {% if field.options[0].select_type == "dynamic" %}
+          choices={{{ field.field }}Options?.map(record => ({
+            id: record.{{ field.options[0].value_field }},
+            name: record.{{ field.options[0].label_field }},
+            value: record.{{ field.options[0].value_field }}
           })) || []}
           {% else %}
-          choices={% raw %}{{% endraw %}{{ field.select_options | tojson }}{% raw %}}{% endraw %}
+          choices={{{ field.options[0].select_options | tojson }}}
           {% endif %}
+          optionText="name"
+          optionValue="value"
         />
         {% else %}
         <TextInput source="{{ field.field }}" type="{{ field.type }}" />

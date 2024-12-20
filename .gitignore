@@ -9,3 +9,10 @@ app-generator-cli.egg-info/
 #ignore all files in the .gitignore file
 .gitignore
 
+#ignore all node_modules in the selected frontend folder
+selectedProjects/20241220_224636/frontend/node_modules/
+selectedProjects/20241220_224636/frontend/.env
+selectedProjects/20241220_224636/frontend/package-lock.json
+selectedProjects/20241219_001418/frontend/node_modules/
+selectedProjects/20241219_001418/frontend/.env
+selectedProjects/20241219_001418/frontend/package-lock.json

@@ -1,0 +1,511 @@
+{
+  "title": "Job Application Tracker",
+  "description": "Application to track job applications and their statuses",
+  "use_cases": [
+    {
+      "name": "Track Job Applications",
+      "description": "Record and categorize job applications, their statuses, and relevant details"
+    },
+    {
+      "name": "Manage Job Categories",
+      "description": "Organize job applications into categories based on job type or source"
+    },
+    {
+      "name": "Monitor Application Statuses",
+      "description": "Update and track the status of each job application"
+    }
+  ],
+  "entities": [
+    {
+      "name": "job_applications",
+      "description": "Stores job application records",
+      "columns": {
+        "headers": [
+          "name",
+          "data_type",
+          "is_primary",
+          "is_nullable",
+          "is_unique",
+          "default",
+          "auto_increment",
+          "is_foreign",
+          "foreign_table",
+          "foreign_column",
+          "on_delete",
+          "on_update"
+        ],
+        "rows": [
+          [
+            "id",
+            "uuid",
+            true,
+            false,
+            true,
+            "gen_random_uuid()",
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "job_title",
+            "varchar",
+            false,
+            false,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "company_name",
+            "varchar",
+            false,
+            false,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "application_date",
+            "date",
+            false,
+            false,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "status",
+            "varchar",
+            false,
+            false,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "category_id",
+            "uuid",
+            false,
+            false,
+            false,
+            null,
+            false,
+            true,
+            "categories",
+            "id",
+            "CASCADE",
+            "CASCADE"
+          ],
+          [
+            "user_id",
+            "uuid",
+            false,
+            false,
+            false,
+            null,
+            false,
+            true,
+            "profiles",
+            "id",
+            "CASCADE",
+            "CASCADE"
+          ]
+        ]
+      },
+      "relationships": {
+        "headers": [
+          "entity",
+          "type",
+          "description"
+        ],
+        "rows": [
+          [
+            "categories",
+            "many-to-one",
+            "Each job application belongs to one category"
+          ],
+          [
+            "profiles",
+            "many-to-one",
+            "Each job application belongs to one user"
+          ]
+        ]
+      },
+      "indexes": {
+        "headers": [
+          "name",
+          "columns",
+          "is_unique",
+          "is_full_text"
+        ],
+        "rows": [
+          [
+            "idx_application_category",
+            "category_id",
+            false,
+            false
+          ],
+          [
+            "idx_application_user",
+            "user_id",
+            false,
+            false
+          ]
+        ]
+      },
+      "composite_primary_keys": null,
+      "composite_unique_constraints": null,
+      "check_constraints": null,
+      "partition_by": null
+    },
+    {
+      "name": "categories",
+      "description": "Stores job application categories",
+      "columns": {
+        "headers": [
+          "name",
+          "data_type",
+          "is_primary",
+          "is_nullable",
+          "is_unique",
+          "default",
+          "auto_increment",
+          "is_foreign",
+          "foreign_table",
+          "foreign_column",
+          "on_delete",
+          "on_update"
+        ],
+        "rows": [
+          [
+            "id",
+            "uuid",
+            true,
+            false,
+            true,
+            "gen_random_uuid()",
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "name",
+            "varchar",
+            false,
+            false,
+            true,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "description",
+            "text",
+            false,
+            true,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "relationships": {
+        "headers": [
+          "entity",
+          "type",
+          "description"
+        ],
+        "rows": []
+      },
+      "indexes": {
+        "headers": [
+          "name",
+          "columns",
+          "is_unique",
+          "is_full_text"
+        ],
+        "rows": [
+          [
+            "idx_category_name",
+            "name",
+            true,
+            false
+          ]
+        ]
+      },
+      "composite_primary_keys": null,
+      "composite_unique_constraints": null,
+      "check_constraints": null,
+      "partition_by": null
+    },
+    {
+      "name": "statuses",
+      "description": "Stores application statuses",
+      "columns": {
+        "headers": [
+          "name",
+          "data_type",
+          "is_primary",
+          "is_nullable",
+          "is_unique",
+          "default",
+          "auto_increment",
+          "is_foreign",
+          "foreign_table",
+          "foreign_column",
+          "on_delete",
+          "on_update"
+        ],
+        "rows": [
+          [
+            "id",
+            "uuid",
+            true,
+            false,
+            true,
+            "gen_random_uuid()",
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "status",
+            "varchar",
+            false,
+            false,
+            true,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            "description",
+            "text",
+            false,
+            true,
+            false,
+            null,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "relationships": {
+        "headers": [
+          "entity",
+          "type",
+          "description"
+        ],
+        "rows": []
+      },
+      "indexes": {
+        "headers": [
+          "name",
+          "columns",
+          "is_unique",
+          "is_full_text"
+        ],
+        "rows": [
+          [
+            "idx_status_name",
+            "status",
+            true,
+            false
+          ]
+        ]
+      },
+      "composite_primary_keys": null,
+      "composite_unique_constraints": null,
+      "check_constraints": null,
+      "partition_by": null
+    }
+  ],
+  "mock_users": [
+    {
+      "records": {
+        "headers": [
+          "email",
+          "password",
+          "role"
+        ],
+        "rows": [
+          [
+            "admin@example.com",
+            "admin123",
+            "admin"
+          ],
+          [
+            "user@example.com",
+            "user123",
+            "user"
+          ]
+        ]
+      }
+    }
+  ],
+  "mock_data": [
+    {
+      "entity_name": "categories",
+      "records": {
+        "headers": [
+          "id",
+          "name",
+          "description"
+        ],
+        "rows": [
+          [
+            "cat-1",
+            "Software Engineering",
+            "Jobs related to software development and engineering"
+          ],
+          [
+            "cat-2",
+            "Project Management",
+            "Jobs related to managing projects"
+          ]
+        ]
+      },
+      "dependencies": []
+    },
+    {
+      "entity_name": "statuses",
+      "records": {
+        "headers": [
+          "id",
+          "status",
+          "description"
+        ],
+        "rows": [
+          [
+            "status-1",
+            "Applied",
+            "Application has been submitted"
+          ],
+          [
+            "status-2",
+            "Interviewing",
+            "Application is in the interview stage"
+          ],
+          [
+            "status-3",
+            "Offer",
+            "Candidate has received a job offer"
+          ],
+          [
+            "status-4",
+            "Rejected",
+            "Application has been rejected"
+          ],
+          [
+            "status-5",
+            "Accepted",
+            "Candidate has accepted the offer"
+          ]
+        ]
+      },
+      "dependencies": []
+    },
+    {
+      "entity_name": "job_applications",
+      "records": {
+        "headers": [
+          "id",
+          "job_title",
+          "company_name",
+          "application_date",
+          "status",
+          "category_id",
+          "user_id"
+        ],
+        "rows": [
+          [
+            "uuid-1",
+            "Software Developer",
+            "Tech Company A",
+            "2023-05-01",
+            "status-1",
+            "cat-1",
+            "user@example.com"
+          ],
+          [
+            "uuid-2",
+            "Project Coordinator",
+            "Business Inc.",
+            "2023-05-15",
+            "status-2",
+            "cat-2",
+            "admin@example.com"
+          ],
+          [
+            "uuid-3",
+            "Data Analyst",
+            "Analytics Co.",
+            "2023-06-10",
+            "status-3",
+            "cat-1",
+            "user@example.com"
+          ],
+          [
+            "uuid-4",
+            "Frontend Developer",
+            "Creative Agency",
+            "2023-06-20",
+            "status-4",
+            "cat-1",
+            "admin@example.com"
+          ]
+        ]
+      },
+      "dependencies": [
+        "categories",
+        "statuses"
+      ]
+    }
+  ]
+}

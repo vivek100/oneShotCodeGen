@@ -1,0 +1,17 @@
+2024-12-20 22:46:36,161 - INFO - Starting application generation
+2024-12-20 22:46:37,895 - INFO - Domain model generated from AI
+2024-12-20 22:46:37,903 - INFO - Generating SQL files
+2024-12-20 22:46:37,916 - INFO - Generating interface files
+2024-12-20 22:49:00,176 - INFO - Copying template files
+2024-12-20 22:49:00,177 - INFO - Generating component files
+2024-12-20 22:49:00,177 - INFO - Generating page files
+2024-12-20 22:49:00,177 - INFO - Installing dependencies
+2024-12-20 22:49:00,410 - INFO - 
+Generated files:
+2024-12-20 22:49:00,419 - INFO -   - domain_model.json
+2024-12-20 22:49:00,427 - INFO -   - interface_model.json
+2024-12-20 22:49:00,436 - INFO -   - sql/*.sql
+2024-12-20 22:49:00,447 - INFO -   - src/components/*
+2024-12-20 22:49:00,450 - INFO -   - src/pages/*
+2024-12-20 22:49:00,458 - INFO -   - README.md
+2024-12-20 22:49:00,465 - INFO -   - generation.log

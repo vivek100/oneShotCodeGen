@@ -131,6 +131,7 @@ def generate_domain(description: str) -> Dict[str, Any]:
         "headers": ["name", "data_type", "is_primary", "is_nullable", "is_unique","default", "auto_increment", "is_foreign", "foreign_table", "foreign_column", "on_delete", "on_update"]
         - make sure "is_primary" is true for only one column in each entity, we can not have multiple primary keys
         - while defining foregin key relationships, if its a user id(type is uuid) field map it to profiles table id column. In mock data you can pass acutal email as user id, but dont get confused with the user id, we will map the correct user's id while creating the sql files. Just make sure the user with the email is present in mock users data.
+        - Do not create emtpy columns in the entities
     2. All relationships between entities are properly defined, do not miss any relationship and make sure to reference the correct columns and column types match with the foreign entities.
     3. Don't add details for following default columns in the entities, later on while creating the tables we add columns to every table:
         "created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP",

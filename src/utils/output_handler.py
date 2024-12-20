@@ -567,10 +567,11 @@ def save_domain_model(output_dir: Path, domain_model: Dict[str, Any]):
         
         # Check each column for foreign keys
         for row in entity['columns']['rows']:
-            if row[foreign_idx]:
-                foreign_table = row[foreign_table_idx]
-                if foreign_table != 'auth.users':  # Skip external dependencies
-                    dependencies.add(foreign_table)
+            if row and len(row) > foreign_idx:
+                if row[foreign_idx]:
+                    foreign_table = row[foreign_table_idx]
+                    if foreign_table != 'auth.users':  # Skip external dependencies
+                        dependencies.add(foreign_table)
         
         dependency_graph[table_name] = dependencies
         table_dependencies[table_name] = entity
