@@ -2,29 +2,34 @@ import React from "react";
 import { Create, SimpleForm, TextInput, SelectInput, useGetList } from "react-admin";
 
 const {{ resource.name.replace(' ', '') }}Create = () => {
+  {% if resource.create_fields %}
   {% for field in resource.create_fields %}
-  {% if field.type == "select" and field.options[0].select_type == "dynamic" %}
+  {% if field.type == "select" and field.options and field.options[0] and field.options[0].select_type == "dynamic" %}
   const { data: {{ field.field }}Options } = useGetList("{{ field.options[0].provider }}", {
     pagination: { page: 1, perPage: 100 },
   });
   {% endif %}
   {% endfor %}
+  {% endif %}
 
   return (
     <Create>
       <SimpleForm>
+        {% if resource.create_fields %}
         {% for field in resource.create_fields %}
         {% if field.type == "select" %}
         <SelectInput 
           source="{{ field.field }}" 
-          {% if field.options[0].select_type == "dynamic" %}
-          choices={{{ field.field }}Options?.map(record => ({
+          {% if field.options and field.options[0] and field.options[0].select_type == "dynamic" %}
+          choices={ {{ field.field }}Options && {{ field.field }}Options.map(record => ({
             id: record.{{ field.options[0].value_field }},
             name: record.{{ field.options[0].label_field }},
             value: record.{{ field.options[0].value_field }}
           })) || []}
+          {% elif field.options and field.options[0] and field.options[0].select_options %}
+          choices={{ field.options[0].select_options | tojson }}
           {% else %}
-          choices={{{ field.options[0].select_options | tojson }}}
+          choices={[]}
           {% endif %}
           optionText="name"
           optionValue="value"
@@ -33,6 +38,9 @@ const {{ resource.name.replace(' ', '') }}Create = () => {
         <TextInput source="{{ field.field }}" type="{{ field.type }}" />
         {% endif %}
         {% endfor %}
+        {% else %}
+        {/* No create fields defined */}
+        {% endif %}
       </SimpleForm>
     </Create>
   );

@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import asyncio
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -14,6 +14,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from urllib.parse import urlparse
 import logging
+from pydantic import BaseModel
 
 class CodeGenerator:
     def __init__(self, output_dir: Path):
@@ -750,8 +751,9 @@ def generate_sql_schema(entity: Entity, prefix: str) -> str:
     on_update_idx = headers.index("on_update") if "on_update" in headers else None
     auto_increment_idx = headers.index("auto_increment") if "auto_increment" in headers else None
     
-    # Get list of column names for checking duplicates
-    column_names = [row[name_idx] for row in entity.columns.rows]
+    # Filter out empty rows and get list of column names
+    valid_rows = [row for row in entity.columns.rows if row]  # Remove empty rows
+    column_names = [row[name_idx] for row in valid_rows]
     
     # Add default tracking columns only if they don't already exist
     default_columns = []
@@ -800,7 +802,50 @@ def generate_sql_schema(entity: Entity, prefix: str) -> str:
         if row[unique_idx]:
             col_def.append("UNIQUE")
         if default_idx is not None and row[default_idx] and postgres_type != 'UUID':
-            col_def.append(f"DEFAULT {row[default_idx]}")
+            default_value = row[default_idx]
+            
+            # List of timestamp-related functions that shouldn't be quoted
+            timestamp_functions = [
+                'CURRENT_TIMESTAMP',
+                'NOW()',
+                'CURRENT_TIME',
+                'CURRENT_DATE',
+                'LOCALTIMESTAMP'
+            ]
+            
+            if postgres_type == 'UUID':
+                # UUID defaults are handled separately
+                pass
+            elif any(default_value.upper() == func for func in timestamp_functions):
+                # Timestamp functions don't need quotes
+                col_def.append(f"DEFAULT {default_value}")
+            elif postgres_type == 'VARCHAR' or postgres_type == 'TEXT':
+                # String values need to be quoted
+                col_def.append(f"DEFAULT '{default_value}'")
+            elif postgres_type == 'TIMESTAMP':
+                # Check if it's a function call
+                if default_value.lower().endswith('()') or default_value.upper() in timestamp_functions:
+                    col_def.append(f"DEFAULT {default_value}")
+                else:
+                    col_def.append(f"DEFAULT '{default_value}'")
+            elif postgres_type in ['INTEGER', 'FLOAT', 'DECIMAL', 'NUMERIC']:
+                # Numeric values don't need quotes
+                col_def.append(f"DEFAULT {default_value}")
+            elif postgres_type == 'BOOLEAN':
+                # Boolean values should be true/false without quotes
+                col_def.append(f"DEFAULT {default_value.lower()}")
+            elif default_value.lower().endswith('()'):
+                # Function calls don't need quotes
+                col_def.append(f"DEFAULT {default_value}")
+            else:
+                # For enum types or other types, we need to check if it's a string
+                try:
+                    float(default_value)
+                    # If it's a number, don't add quotes
+                    col_def.append(f"DEFAULT {default_value}")
+                except ValueError:
+                    # If it's not a number, add quotes
+                    col_def.append(f"DEFAULT '{default_value}'")
             
         columns.append(" ".join(col_def))
         
@@ -1112,3 +1157,12 @@ def setup_logging(output_dir: Path) -> logging.Logger:
     logger.addHandler(console_handler)
     
     return logger 
+
+def save_partial_model(project_dir: Path, name: str, model: Union[BaseModel, Dict[str, Any]]) -> None:
+    """Save a partial model to the output directory."""
+    file_path = project_dir / f"{name}.json"
+    with open(file_path, 'w') as f:
+        if isinstance(model, BaseModel):
+            json.dump(model.model_dump(), f, indent=2)
+        else:
+            json.dump(model, f, indent=2) 

@@ -87,6 +87,31 @@ class ApplicationDomain(BaseModel):
     mock_users: List[MockUser]
     mock_data: List[MockData]
 
+# Step-by-Step Domain Models
+class UseCaseModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", exclude_none=True)
+    title: str
+    description: str
+    use_cases: List[UseCase]
+
+class EntityModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", exclude_none=True)
+    title: str
+    description: str
+    entities: List[Entity]
+
+class MockUserModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", exclude_none=True)
+    title: str
+    description: str
+    mock_users: List[MockUser]
+
+class MockDataModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", exclude_none=True)
+    title: str
+    description: str
+    mock_data: List[MockData]
+
 # Part 2: UI/UX and View Models
 #----------------------------------------
 # Component Base Models

@@ -247,50 +247,50 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
     """
 
     # Helper function to get column value by header name
-    def get_value_by_header(row, headers, header_name):
+    def get_value_by_header(headers, row, header_name):
         try:
             index = headers.index(header_name)
             return row[index]
         except (ValueError, IndexError):
             return None
 
-    # Format entities section
+    # Format entities section - now handling dictionary
     entities_text = []
     for entity in domain_model.get('entities', []):
-        name = entity['name']
+        name = entity['name']  # Dictionary access
         description = entity['description']
         
         # Format columns
-        columns_text = []
-        columns = entity['columns']
-        for row in columns['rows']:
-            col_name = get_value_by_header(row, columns['headers'], 'name')
-            col_type = get_value_by_header(row, columns['headers'], 'data_type')
-            columns_text.append(f"    - {col_name} ({col_type})")
+        columns = []
+        for row in entity['columns']['rows']:
+            column_name = get_value_by_header(entity['columns']['headers'], row, 'name')
+            data_type = get_value_by_header(entity['columns']['headers'], row, 'data_type')
+            is_primary = get_value_by_header(entity['columns']['headers'], row, 'is_primary')
+            is_nullable = get_value_by_header(entity['columns']['headers'], row, 'is_nullable')
+            is_unique = get_value_by_header(entity['columns']['headers'], row, 'is_unique')
+            if column_name and data_type:
+                columns.append(f"{column_name} ({data_type})")
         
         # Format relationships
-        relationships_text = []
-        if entity.get('relationships'):
+        relationships = []
+        if 'relationships' in entity and 'rows' in entity['relationships']:
             for row in entity['relationships']['rows']:
-                rel_entity = get_value_by_header(row, entity['relationships']['headers'], 'entity')
-                rel_type = get_value_by_header(row, entity['relationships']['headers'], 'type')
-                rel_desc = get_value_by_header(row, entity['relationships']['headers'], 'description')
-                relationships_text.append(f"    - {rel_type} with {rel_entity}: {rel_desc}")
+                related_entity = row[0]
+                rel_type = row[1]
+                relationships.append(f"{rel_type} {related_entity}")
+        
+        entity_text = f"""
+        Entity: {name}
+        Description: {description}
+        Columns: {', '.join(columns)}
+        Relationships: {', '.join(relationships) if relationships else 'None'}
+        """
+        entities_text.append(entity_text)
 
-        # Combine all entity information
-        entity_text = [
-            f"- {name}: {description}",
-            "    Columns:",
-            *columns_text
-        ]
-        
-        if relationships_text:
-            entity_text.extend([
-                "    Relationships:",
-                *relationships_text
-            ])
-        
-        entities_text.append("\n".join(entity_text))
+    # Format use cases - now handling dictionaries
+    use_cases_text = []
+    for uc in domain_model.get('use_cases', []):
+        use_cases_text.append(f"- {uc['name']}: {uc['description']}")  # Dictionary access instead of dot notation
 
     domain_description = f"""
     Application Domain Model:
@@ -298,7 +298,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
     Description: {domain_model.get('description')}
 
     Use Cases:
-    {chr(10).join([f"- {uc['name']}: {uc['description']}" for uc in domain_model.get('use_cases', [])])}
+    {chr(10).join(use_cases_text)}
 
     Base Tables:
     {chr(10).join(entities_text)}
@@ -315,6 +315,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
     {components_info}
 
     {view_info}
+
     {structure_info}
 
     {example_output}

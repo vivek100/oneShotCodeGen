@@ -1,0 +1,568 @@
+{
+  "pages": [
+    {
+      "type": "dashboard",
+      "name": "Payroll Dashboard",
+      "desc": "Overview of payroll metrics and trends",
+      "zones": [
+        {
+          "name": "Payroll Summary",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "card",
+              "name": "TotalSalaries",
+              "provider": "payroll_records",
+              "title": "Total Salaries Paid",
+              "column": "gross_pay",
+              "operation": "sum",
+              "icon": "attach_money",
+              "color": "#4caf50"
+            },
+            {
+              "type": "card",
+              "name": "TotalDeductions",
+              "provider": "payroll_records",
+              "title": "Total Deductions",
+              "column": "deductions",
+              "operation": "sum",
+              "icon": "money_off",
+              "color": "#f44336"
+            },
+            {
+              "type": "chart",
+              "name": "MonthlySalariesTrend",
+              "provider": "monthly_salaries_report",
+              "chart_type": "line",
+              "config": {
+                "x": "month",
+                "y": "total_salaries"
+              },
+              "size": {
+                "width": 600,
+                "height": 400
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Employees",
+      "resource": "employees",
+      "provider": "employees",
+      "filters": [
+        {
+          "field": "email",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "full_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "salary",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "tax_info",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "create_fields": [
+        {
+          "field": "email",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "full_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "salary",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "tax_info",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "email",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "full_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "salary",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "tax_info",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "email",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "full_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "salary",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "tax_info",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "email",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "full_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "salary",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "tax_info",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_actions": [
+        {
+          "action": "edit"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Payroll Records",
+      "resource": "payroll_records",
+      "provider": "payroll_records",
+      "filters": null,
+      "create_fields": [
+        {
+          "field": "employee_id",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "dynamic",
+              "select_options": [],
+              "provider": "employees",
+              "value_field": "id",
+              "label_field": "full_name"
+            }
+          ]
+        },
+        {
+          "field": "pay_period_start",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "pay_period_end",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "gross_pay",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "deductions",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "net_pay",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "employee_id",
+          "type": "select",
+          "options": [
+            {
+              "select_type": "dynamic",
+              "select_options": [],
+              "provider": "employees",
+              "value_field": "id",
+              "label_field": "full_name"
+            }
+          ]
+        },
+        {
+          "field": "pay_period_start",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "pay_period_end",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "gross_pay",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "deductions",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "net_pay",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "employee_id",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "pay_period_start",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "pay_period_end",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "gross_pay",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "deductions",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "net_pay",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "employee_id",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "pay_period_start",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "pay_period_end",
+          "type": "date",
+          "options": null
+        },
+        {
+          "field": "gross_pay",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "deductions",
+          "type": "number",
+          "options": null
+        },
+        {
+          "field": "net_pay",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "list_actions": [
+        {
+          "action": "edit"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Tax Deductions",
+      "resource": "tax_deductions",
+      "provider": "tax_deductions",
+      "filters": null,
+      "create_fields": [
+        {
+          "field": "tax_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "tax_rate",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "edit_fields": [
+        {
+          "field": "tax_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "tax_rate",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "view_fields": [
+        {
+          "field": "tax_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "tax_rate",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "tax_name",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "tax_rate",
+          "type": "number",
+          "options": null
+        }
+      ],
+      "list_actions": [
+        {
+          "action": "edit"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    },
+    {
+      "type": "resource",
+      "name": "Payroll Reports",
+      "resource": "payroll_reports",
+      "provider": "payroll_reports",
+      "filters": null,
+      "create_fields": [],
+      "edit_fields": [],
+      "view_fields": [
+        {
+          "field": "report_type",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "generated_on",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "details",
+          "type": "json",
+          "options": null
+        }
+      ],
+      "list_fields": [
+        {
+          "field": "report_type",
+          "type": "text",
+          "options": null
+        },
+        {
+          "field": "generated_on",
+          "type": "text",
+          "options": null
+        }
+      ],
+      "list_actions": []
+    },
+    {
+      "type": "custom",
+      "name": "Payroll Reports Generation",
+      "desc": "Generate Monthly and Yearly Payroll Reports",
+      "zones": [
+        {
+          "name": "Reports Generation",
+          "layout": {
+            "columns": 12,
+            "spacing": 2
+          },
+          "components": [
+            {
+              "type": "form",
+              "name": "ReportGenerationForm",
+              "fields": [
+                {
+                  "field": "report_type",
+                  "type": "select",
+                  "required": true,
+                  "options": [
+                    {
+                      "select_type": "static",
+                      "select_options": [
+                        {
+                          "id": "monthly",
+                          "name": "Monthly",
+                          "value": "monthly"
+                        },
+                        {
+                          "id": "yearly",
+                          "name": "Yearly",
+                          "value": "yearly"
+                        }
+                      ],
+                      "provider": "payroll_reports",
+                      "value_field": "id",
+                      "label_field": "report_type"
+                    }
+                  ]
+                }
+              ],
+              "submit": "generate"
+            },
+            {
+              "type": "table",
+              "name": "GeneratedReportsList",
+              "provider": "payroll_reports",
+              "cols": [
+                {
+                  "field": "report_type",
+                  "header": "Report Type"
+                },
+                {
+                  "field": "generated_on",
+                  "header": "Generated On"
+                }
+              ],
+              "actions": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "view_name": "monthly_salaries_report",
+      "source_tables": [
+        "payroll_records"
+      ],
+      "columns": [
+        {
+          "name": "month",
+          "transformation": "DATE_TRUNC('month', pay_period_start)"
+        },
+        {
+          "name": "total_salaries",
+          "transformation": "SUM(gross_pay)"
+        }
+      ],
+      "group_by": [
+        "DATE_TRUNC('month', pay_period_start)"
+      ],
+      "filters": null,
+      "description": "Aggregates total salaries per month"
+    },
+    {
+      "view_name": "yearly_payroll_report",
+      "source_tables": [
+        "payroll_records"
+      ],
+      "columns": [
+        {
+          "name": "year",
+          "transformation": "DATE_TRUNC('year', pay_period_start)"
+        },
+        {
+          "name": "total_salaries",
+          "transformation": "SUM(gross_pay)"
+        }
+      ],
+      "group_by": [
+        "DATE_TRUNC('year', pay_period_start)"
+      ],
+      "filters": null,
+      "description": "Aggregates total salaries per year"
+    },
+    {
+      "view_name": "monthly_deduction_report",
+      "source_tables": [
+        "payroll_records"
+      ],
+      "columns": [
+        {
+          "name": "month",
+          "transformation": "DATE_TRUNC('month', pay_period_start)"
+        },
+        {
+          "name": "total_deductions",
+          "transformation": "SUM(deductions)"
+        }
+      ],
+      "group_by": [
+        "DATE_TRUNC('month', pay_period_start)"
+      ],
+      "filters": "pay_period_start IS NOT NULL",
+      "description": "Aggregates total deductions per month"
+    }
+  ]
+}

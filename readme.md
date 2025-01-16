@@ -4,6 +4,33 @@ A command-line interface tool for generating full-stack applications with React 
 
 ## Updates
 
+- 2024-01-16 (Edit Flow):
+    - Introduced intelligent update strategies for modifying existing applications
+    - Supports two main update approaches:
+        - Full Regeneration: Complete rebuild while preserving core functionality
+        - Partial Update: Targeted modifications to specific components
+    - Smart backup system that creates timestamped backups before changes
+    - Modular update system supporting changes to:
+        - Use cases and business logic
+        - Entity models and relationships
+        - Mock data and test users
+        - Interface components and layouts
+    - Context-aware updates that maintain consistency across all application layers and the frontend
+
+- 2024-01-10 (Optimized AI Generation Pipeline):
+    - Restructured AI generation from 2 calls to 4 specialized calls:
+        1. Use Case Generation: Focused on business logic and user workflows
+        2. Entity Model Generation: Database schema and relationships
+        3. Mock Data Generation: Test data and user scenarios
+        4. Interface Model Generation: UI components and layouts
+    - Benefits:
+        - Improved accuracy through specialized prompts
+        - Better error handling and validation between steps
+        - Reduced token usage per call
+        - Enhanced ability to maintain context
+    - Original 2-call approach moved to legacy mode for backwards compatibility
+
+
 - 2024-12-20(reduced token usage by 70% and accuracy by 80%):
     - Integrated with outlines to generate the structured output, this uses a method where logits are assigned low or zero probability to the tokens that are not part of the output, this is done right before the token is generated. This enables the tool to get higher accuracy output with smaller models
     - The structured output is then used to generate the frontend and backend code which sort of like configuration files, this helps in generating the code with less tokens
@@ -50,9 +77,26 @@ NOTIFY pgrst, 'reload config';
 
 2. Generate an application:
 
+a. Using the new optimized pipeline (recommended):
 ``` bash
-python -m src.cli "Create an expense tracker app"
+python -m src.cli create "Create an expense tracker app"
 ```
+
+b. Using legacy mode (2-call approach):
+``` bash
+python -m src.cli create "Create an expense tracker app" --use-legacy
+```
+c. Adding custom output directory:
+``` bash
+python -m src.cli create "Create an expense tracker app" --output-dir "path/to/outputfolder"
+```
+d. Edit an existing application:
+
+Using command line description:
+``` bash
+python -m src.cli edit <project_dir> --description "Add a dashboard for expense analytics"
+```
+
 Once generated, you can run the frontend by running `npm start` in the frontend directory:
 ``` bash
 cd output/{output_folder_name}/frontend
@@ -65,11 +109,55 @@ app-generator-cli/
 ├── src/ # Source code for the CLI
 ├── output/ # Generated applications
 │ └── [timestamp]/ # Timestamp-based output directory
-│ ├── frontend/ # React frontend application
-│ └── domain_model.json # Application domain model
+│   ├── frontend/ # React frontend application
+│   ├── use_cases.json # Use case definitions
+│   ├── entities.json # Entity model
+│   ├── mock_users.json # Mock user data
+│   ├── mock_data.json # Generated test data
+│   ├── domain_model.json # Combined application model
+│   ├── interface_model.json # UI/UX specifications
+│   ├── sql/ # Generated SQL migrations
+│   ├── src/ # Generated application source
+│   └── generation.log # Generation process log
 └── .env # Environment variables
 ```
 
+## Edit Flow
+
+The Edit Flow system allows you to modify existing applications while maintaining consistency and safety. Here's how to use it:
+
+1. Update an existing application:
+```bash
+python -m src.cli update "Add a dashboard for expense analytics"
+```
+
+2. The system will:
+   - Analyze your change request
+   - Choose an appropriate update strategy
+   - Create a backup of your current application
+   - Apply the changes while maintaining data consistency
+
+### Update Strategies
+
+1. **Full Regeneration**
+   - Used for major architectural changes
+   - Preserves existing functionality while rebuilding the application
+   - Maintains data consistency with existing models
+
+2. **Partial Update**
+   - For targeted changes to specific components
+   - Updates only affected parts of the application
+   - Supports modular updates to:
+     - Use cases and workflows
+     - Entity models and relationships
+     - Mock data and test users
+     - Interface components
+
+### Backup System
+
+- Automatic backups created before any changes
+- Timestamped backup directories: `backups/backup_YYYYMMDD_HHMMSS/`
+- Easy rollback if needed
 
 ## Generated Application Structure
 

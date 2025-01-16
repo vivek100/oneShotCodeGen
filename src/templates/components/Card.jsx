@@ -44,7 +44,7 @@ const Card = ({ name, provider, title, column, operation, icon, color }) => {
   };
 
   return (
-    <MuiCard style={{ backgroundColor: "white", margin: "1rem 0" }}>
+    <MuiCard style={{ margin: "1rem 0" }}>
       <CardContent>
         <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
           <Typography variant="h6">{title}</Typography>
