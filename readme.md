@@ -58,7 +58,7 @@ A command-line interface tool for generating full-stack applications with React 
 - Docker (optional, for containerized deployment)
 - Nginx (optional, for reverse proxy)
 
-## Docker & Nginx Setup
+## Docker & Nginx Setup (optional)
 
 1. Install Docker:
 ```bash
