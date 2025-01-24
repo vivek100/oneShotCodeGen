@@ -4,7 +4,7 @@ A command-line interface tool for generating full-stack applications with React 
 
 ## Updates
 
-- 2024-01-17 (Docker & Nginx Integration):
+- 2024-01-24 (Docker & Nginx Integration):
     - Added Docker and Nginx deployment options for both create and edit flows
     - Support for containerized deployment with optional Nginx reverse proxy
     - Automatic port management and container configuration
