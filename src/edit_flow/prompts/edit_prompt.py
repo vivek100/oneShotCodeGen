@@ -1,73 +1,86 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
+import json
 
 class EditPrompt:
     @staticmethod
     def get_strategy_prompt(change_request: Dict[str, Any], original_context: Dict[str, Any]) -> str:
         return f"""
-        Analyze the following change request and determine the most appropriate update strategy.
-        
+        You are tasked with evaluating a change request for an existing application. Your goal is to determine the most appropriate strategy for implementing the requested changes based on the provided context.
+
         Original Application Context:
         {original_context}
-        
+
         Change Request:
         {change_request}
-        
-        Example Response for Partial Update:
+
+        Based on the information provided, you need to decide between the following two strategies:
+        1. **Use Case Update**: Choose this option if the requested changes can be seamlessly integrated into the existing application as new use cases, enhancing its functionality without disrupting current features or requiring significant architectural changes.
+        2. **Full Regeneration**: Select this option if the requested changes involve substantial modifications that necessitate a complete redesign of the application, including all use cases, entities, and interface components, effectively creating a new application from scratch.
+
+        Example Response for Use Case Update:
         {{
-            "strategy_type": "partial_update",
-            "reasoning": "The requested changes affect specific components without requiring full regeneration",
-            "required_generators": ["entity", "interface"],
-            "change_summary": {{
-                "entity": {{
-                    "description": "Add receipt storage capability",
-                    "changes_needed": "Add receipt_url field to expenses table",
-                    "existing_functionality": "Current expenses table tracks basic expense details"
-                }},
-                "interface": {{
-                    "description": "Add file upload interface",
-                    "changes_needed": "Add file upload component to expense form",
-                    "existing_functionality": "Current form handles basic expense details"
-                }}
-            }}
+            "strategy_type": "use_case_update",
+            "reasoning": "The requested changes can be integrated as new use cases without affecting existing functionality.",
+            "change_summary": [
+                "Add a new use case for tracking recurring expenses.",
+                "Delete the old use case for tracking one-time expenses."
+            ]
         }}
 
         Example Response for Full Regeneration:
         {{
             "strategy_type": "full_regeneration",
-            "reasoning": "Changes require significant architectural modifications",
-            "required_generators": ["use_case", "entity", "mock_data", "interface"],
-            "starter_prompt": "Create an expense tracking application with...",
+            "reasoning": "The requested changes require a complete redesign of the application to accommodate new features and functionalities.",
+            "starter_prompt": "Create a comprehensive expense tracking application with advanced features including recurring expenses, budget tracking, and detailed reporting.",
             "change_summary": null
         }}
 
-        Determine the most appropriate strategy considering:
-        1. Scope of changes
-        2. Impact on existing functionality
-        3. Dependencies between components
-        4. Data model modifications
+        When determining the strategy, consider the following:
+        1. **Scope of Changes**: Are the changes limited to specific features (indicating a use case update), or do they involve fundamental changes to the application's architecture (indicating a full regeneration)?
+        2. **Impact on Existing Functionality**: Will the changes seamlessly integrate with current features without disruption (favoring a use case update), or will they necessitate a complete overhaul of existing functionalities (favoring full regeneration)?
+        3. **Dependencies Between Components**: Are there existing interdependencies that could complicate the integration of new features (suggesting a need for full regeneration), or can the new features be added independently (suggesting a use case update)?
+        4. **Data Model Modifications**: Will the changes require significant alterations to the existing data model (indicating a full regeneration), or can they be accommodated within the current model (indicating a use case update)?
         """
 
     @staticmethod
-    def enhance_generator_prompt(original_prompt: str, change_requirements: Dict[str, Any], 
-                               existing_model: Dict[str, Any]) -> str:
-        """Enhance existing generator prompts with change context"""
+    def get_use_case_update_prompt(app_info: Dict[str, Any], existing_use_cases: List[Dict[str, Any]], 
+                                  change_summary: List[str]) -> str:
+        """Generate prompt for updating use cases"""
         return f"""
-        Consider the following change requirements while maintaining existing functionality.
+        Given the following existing application and its use cases, enhance it with new functionality.
+        Keep all existing use cases and add or modify use cases to support the requested changes.
         
-        Existing Model:
-        {existing_model}
+        Existing Application:
+        Title: {app_info.get('name')}
+        Description: {app_info.get('description')}
+        
+        Existing Use Cases:
+        {json.dumps(existing_use_cases, indent=2)}
         
         Required Changes:
-        Description: {change_requirements.get('description')}
-        Changes Needed: {change_requirements.get('changes_needed')}
-        Existing Functionality: {change_requirements.get('existing_functionality')}
-        
-        Original Prompt:
-        {original_prompt}
+        {json.dumps(change_summary, indent=2)}
         
         Important:
-        1. Preserve all existing functionality
-        2. Add only the requested changes
-        3. Maintain consistency with existing features
-        4. Ensure backward compatibility
+        1. Preserve all existing use cases that are still relevant
+        2. Add new use cases to support the requested changes
+        3. Modify existing use cases if they need updates
+        4. Ensure all use cases are properly described
+        5. Maintain consistency in naming and description style
+        6. Create mutual exclusivity between use cases
+        
+        Example:
+        {{
+            "title": "{app_info.get('name')}",
+            "description": "{app_info.get('description')}",
+            "use_cases": [
+                {{
+                    "name": "Track Expenses",
+                    "description": "Record and categorize daily expenses"
+                }},
+                {{
+                    "name": "New Feature",
+                    "description": "Description of new functionality"
+                }}
+            ]
+        }}
         """ 

@@ -1,3 +1,4 @@
+LICENSE
 setup.py
 app_generator_cli.egg-info/PKG-INFO
 app_generator_cli.egg-info/SOURCES.txt

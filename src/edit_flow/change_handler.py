@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Dict, Any
-from ..models.edit_flow_models import ChangeRequest, ChangeStrategy
+from ..models.edit_flow_models import ChangeRequest, UpdateStrategy
 from .ai_integration import EditFlowAI
 from ..utils.context_loader import ContextLoader
 
@@ -11,12 +11,12 @@ class ChangeHandler:
         self.ai = EditFlowAI()
         self.original_context = self.context_loader.load_context()
 
-    async def evaluate_change(self, change_request: ChangeRequest) -> ChangeStrategy:
+    def evaluate_change(self, change_request: ChangeRequest) -> UpdateStrategy:
         """
         Evaluate changes using AI and determine the appropriate strategy
         """
         try:
-            strategy = await self.ai.evaluate_changes(
+            strategy = self.ai.evaluate_changes(
                 change_request.model_dump(),
                 self.original_context
             )
@@ -29,7 +29,7 @@ class ChangeHandler:
         except Exception as e:
             raise Exception(f"AI evaluation failed: {str(e)}")
     
-    def _save_strategy(self, strategy: ChangeStrategy):
+    def _save_strategy(self, strategy: UpdateStrategy):
         """Save the strategy for future reference"""
         strategy_file = self.project_dir / ".app-generator" / "edit_strategy.json"
         strategy_file.parent.mkdir(exist_ok=True)

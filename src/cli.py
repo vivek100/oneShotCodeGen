@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from typing import Dict, Any
+from typing import Dict, Any, List
 import traceback
 import json
 import asyncio
@@ -54,7 +54,9 @@ def combine_models(
 def create(
     description: str = typer.Argument(..., help="Description of the app to generate"),
     output_dir: str = typer.Option("output", help="Base output directory for generated apps"),
-    use_legacy: bool = typer.Option(False, help="Use legacy single-step generation")
+    use_legacy: bool = typer.Option(False, help="Use legacy single-step generation"),
+    use_docker: bool = typer.Option(False, "--docker", "-d", help="Deploy using Docker"),
+    use_nginx: bool = typer.Option(False, "--nginx", "-n", help="Configure Nginx with Docker")
 ):
     """Generate a complete application based on the description."""
     with Progress(
@@ -128,7 +130,7 @@ def create(
 
             # Save final models
             save_domain_model(project_dir, domain_model)
-            save_interface_model(project_dir, interface_model, domain_model)
+            save_interface_model(project_dir, interface_model, domain_model, use_docker, use_nginx)
 
             # Final success message
             success_message = f"\n Success! Project generated at: {project_dir}"
@@ -161,121 +163,96 @@ def create(
             console.print(f"Additional information: {full_traceback}")
             raise
 
-@click.group()
-def edit():
-    """Commands for editing existing applications"""
-    pass
-
-@edit.command()
+@app.command()
 def edit(
     project_dir: str = typer.Argument(..., help="Project directory to edit"),
-    change_file: str = typer.Option(None, "--change-file", "-c", help="JSON file containing change request"),
     description: str = typer.Option(None, "--description", "-d", help="Description of changes needed"),
-    components: list[str] = typer.Option(None, "--components", "-p", help="Affected components"),
-    priority: str = typer.Option("medium", "--priority", help="Change priority", 
-                                type=click.Choice(["high", "medium", "low"]))
+    use_docker: bool = typer.Option(False, "--docker", "-d", help="Deploy using Docker"),
+    use_nginx: bool = typer.Option(False, "--nginx", "-n", help="Configure Nginx with Docker")
 ):
     """Edit an existing application"""
     console = Console()
     
-    async def run_edit():
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        try:
+            # Create output directory and setup logging
+            task_id = progress.add_task("Setting up...", total=1)
+            project_path = Path(project_dir)
+            logger = setup_logging(project_path)
+            logger.info("Starting application edit")
+            progress.update(task_id, completed=1)
+            
+            # Get change request
+            if not description:
+                raise typer.BadParameter("Description must be provided")
+            
+            change_data = {
+                "description": description,
+                "affected_components": [],  # Default to empty list
+                "priority": "medium"  # Default priority
+            }
+            
+            # Create change request
+            change_request = ChangeRequest(**change_data)
+            
+            # Initialize change handler
+            handler = ChangeHandler(project_path)
+            
+            # Evaluate changes
+            task_id = progress.add_task("Evaluating changes...", total=1)
+            strategy = handler.evaluate_change(change_request)
+            progress.update(task_id, completed=1)
+            
+            # Show strategy details
+            console.print(f"\n[bold]Selected Strategy:[/bold] {strategy.strategy_type}")
+            console.print(f"[bold]Reasoning:[/bold] {strategy.reasoning}")
+            console.print("\n[bold]Required Changes:[/bold]")
+            if strategy.strategy_type == "use_case_update":
+                console.print(f"\n[bold]Use Case Update:[/bold]")
+                for change in strategy.change_summary:
+                    console.print(f"- {change}")
+            elif strategy.strategy_type == "full_regeneration":
+                console.print(f"\n[bold]Full Regeneration prompt:[/bold]")
+                console.print(f"- {strategy.starter_prompt}")
+            elif strategy.strategy_type == "partial_update":
+                console.print(f"\n[bold]Partial Update:[/bold]")
+                console.print(f"-  coming soon")
+                
+            # starting strategy execution
             try:
-                # Create output directory and setup logging
-                task_id = progress.add_task("Setting up...", total=1)
-                project_path = Path(project_dir)
-                logger = setup_logging(project_path)
-                logger.info("Starting application edit")
-                progress.update(task_id, completed=1)
+                executor = StrategyExecutor(project_path, strategy, use_docker, use_nginx)
+                executor.execute()
                 
-                # Get change request
-                if change_file:
-                    task_id = progress.add_task("Loading change file...", total=1)
-                    with open(change_file) as f:
-                        change_data = json.load(f)
-                    progress.update(task_id, completed=1)
-                else:
-                    if not description:
-                        raise typer.BadParameter("Either --change-file or --description must be provided")
+                # Show success message
+                success_message = "\n[green]Changes applied successfully![/green]"
+                console.print(success_message)
+                logger.info("Changes applied successfully")
+                
+                # List updated files
+                console.print("\n[bold]Updated files:[/bold]")
+                for generator in strategy.required_generators:
+                    console.print(f"  - {generator}_model.json")
+                console.print("  - domain_model.json")
+                console.print("  - sql/")
+                console.print("  - src/")
+                if "interface" in strategy.required_generators:
+                    console.print("  - interface_model.json")
                     
-                    change_data = {
-                        "description": description,
-                        "affected_components": components or [],
-                        "priority": priority
-                    }
-                
-                # Create change request
-                change_request = ChangeRequest(**change_data)
-                
-                # Initialize change handler
-                handler = ChangeHandler(project_path)
-                
-                # Evaluate changes
-                task_id = progress.add_task("Evaluating changes...", total=1)
-                strategy = await handler.evaluate_change(change_request)
-                progress.update(task_id, completed=1)
-                
-                # Show strategy details
-                console.print(f"\n[bold]Selected Strategy:[/bold] {strategy.strategy_type}")
-                console.print(f"[bold]Reasoning:[/bold] {strategy.reasoning}")
-                
-                if strategy.change_summary:
-                    console.print("\n[bold]Required Changes:[/bold]")
-                    for generator, requirements in strategy.change_summary.items():
-                        console.print(f"\n[bold]{generator.upper()}:[/bold]")
-                        console.print(f"- Description: {requirements.description}")
-                        console.print(f"- Changes Needed: {requirements.changes_needed}")
-                
-                # Confirm execution
-                if typer.confirm("\nDo you want to proceed with the changes?"):
-                    # Execute strategy with progress tracking
-                    total_steps = len(strategy.required_generators) + 2  # +2 for domain and interface models
-                    with progress:
-                        task_id = progress.add_task(
-                            f"Executing {strategy.strategy_type} strategy...", 
-                            total=total_steps
-                        )
-                        
-                        executor = StrategyExecutor(project_path, strategy)
-                        await executor.execute()
-                        
-                        progress.update(task_id, completed=total_steps)
-                    
-                    # Show success message
-                    success_message = "\n[green]Changes applied successfully![/green]"
-                    console.print(success_message)
-                    logger.info("Changes applied successfully")
-                    
-                    # List updated files
-                    console.print("\n[bold]Updated files:[/bold]")
-                    for generator in strategy.required_generators:
-                        console.print(f"  - {generator}_model.json")
-                    console.print("  - domain_model.json")
-                    console.print("  - sql/")
-                    console.print("  - src/")
-                    if "interface" in strategy.required_generators:
-                        console.print("  - interface_model.json")
-                else:
-                    console.print("\n[yellow]Operation cancelled.[/yellow]")
-                    logger.info("Operation cancelled by user")
-                
             except Exception as e:
-                error_message = f"\nError: {str(e)}"
-                full_traceback = traceback.format_exc()
-                console.print(f"[red]{error_message}[/red]")
-                logger.error(error_message)
-                logger.error(f"Full traceback:\n{full_traceback}")
-                raise typer.Exit(1)
-    
-    # Run the async function
-    asyncio.run(run_edit())
-
-# Add edit command group to main CLI
-app.add_command(edit)
+                console.print("\nCode generation failed")
+                logger.error("Code generation failed")
+            
+        except Exception as e:
+            error_message = f"\nError: {str(e)}"
+            full_traceback = traceback.format_exc()
+            console.print(f"[red]{error_message}[/red]")
+            logger.error(error_message)
+            logger.error(f"Full traceback:\n{full_traceback}")
+            raise typer.Exit(1)
 
 if __name__ == "__main__":
     app()

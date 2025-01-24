@@ -1,7 +1,7 @@
 typer[all]==0.9.0
-numpy
-pydantic==2.6.1
-outlines
+numpy==2.0.2
+pydantic==2.10.3
+outlines==0.1.11
 rich==13.7.0
 python-dotenv==1.0.0
 jinja2==3.1.3
@@ -11,7 +11,7 @@ aiohttp==3.9.3
 rich-click==1.7.3
 inquirer==3.2.4
 colorama==0.4.6
-openai
+openai==1.57.1
 setuptools>=65.0.0
 wheel>=0.36.0
 psycopg2-binary==2.9.10

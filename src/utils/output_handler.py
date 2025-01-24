@@ -8,7 +8,7 @@ from typing import Dict, Any, List, Union
 from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, Template
 from ..models.base_models import Entity, MockData, MockUser
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -71,15 +71,15 @@ class CodeGenerator:
                     self.pages_dir / f"{page_name}Create.jsx"
                 )
 
-        # Generate layout.js
-        self.render_template("layout.jinja2", {"pages": interface_model["pages"]}, self.frontend_dir / "src/layout.js")
+        # Generate layout.jsx
+        self.render_template("layout.jinja2", {"pages": interface_model["pages"]}, self.frontend_dir / "src/layout.jsx")
 
-        # Generate App.js
+        # Generate App.jsx  
         app_context = {
             "pages": [p for p in interface_model["pages"] if p["type"] == "custom"],
             "resources": [p for p in interface_model["pages"] if p["type"] == "resource"]
         }
-        self.render_template("app.jinja2", app_context, self.frontend_dir / "src/App.js")
+        self.render_template("app.jinja2", app_context, self.frontend_dir / "src/App.jsx")
 
 class ProjectSetup:
     def __init__(self, output_dir: Path):
@@ -179,28 +179,40 @@ class ProjectSetup:
                     # Build view definition
                     columns = [
                         f"{col.get('transformation', col['name'])} as {col['name']}"
-                        for col in view.columns
+                        for col in view['columns']
                     ]
                     
-                    from_clause = ", ".join(view.source_tables)
-                    where_clause = f"WHERE {view.filters}" if view.filters else ""
-                    group_by = (f"GROUP BY {', '.join(view.group_by)}" 
-                              if view.group_by else "")
+                    # Build FROM clause with proper JOINs
+                    tables = view['source_tables']
+                    from_clause = f"FROM {self.schema_prefix}_{tables[0]}"  # Start with first table
+                    
+                    # Add subsequent tables as JOINs with ON condition from filters
+                    if len(tables) > 1:
+                        # Move the filter condition to the ON clause of the JOIN
+                        from_clause += f"\nJOIN {self.schema_prefix}_{tables[1]} ON {view['filters']}"
+                        # Clear the filters since we used it in the JOIN
+                        where_clause = ""
+                    else:
+                        # If only one table, keep the WHERE clause
+                        where_clause = f"WHERE {view['filters']}" if view.get('filters') else ""
+                    
+                    group_by = f"GROUP BY {', '.join(view['group_by'])}" if view.get('group_by') else ""
 
                     view_sql = f"""
-                    CREATE OR REPLACE VIEW {schema_name}.{view.view_name} AS
+                    -- Auto-generated view for {view['description']}
+                    CREATE OR REPLACE VIEW {schema_name}.{self.schema_prefix}_{view['view_name']} AS
                     SELECT {', '.join(columns)}
-                    FROM {from_clause}
+                    {from_clause}
                     {where_clause}
                     {group_by};
                     
                     -- Grant permissions
-                    GRANT SELECT ON {schema_name}.{view.view_name} TO authenticated;
-                    GRANT SELECT ON {schema_name}.{view.view_name} TO anon;
+                    GRANT SELECT ON {schema_name}.{self.schema_prefix}_{view['view_name']} TO authenticated;
+                    GRANT SELECT ON {schema_name}.{self.schema_prefix}_{view['view_name']} TO anon;
                     """
 
                     cur.execute(view_sql)
-                    print(f"Created view: {view.view_name}")
+                    print(f"Created view: {view['view_name']}")
 
             finally:
                 cur.close()
@@ -342,18 +354,18 @@ class ProjectSetup:
             self.frontend_dir / "src",
             dirs_exist_ok=True
         )
-        
-        # Copy public folder
-        shutil.copytree(
-            template_dir / "public",
-            self.frontend_dir / "public",
-            dirs_exist_ok=True
-        )
-        # copy components folder
+
+        #copy the components folder
         shutil.copytree(
             template_dir / "components",
             self.frontend_dir / "src/components",
             dirs_exist_ok=True
+        )
+
+        # Copy index.html from templates to frontend directory
+        shutil.copy2(
+            template_dir / "index.html",
+            self.frontend_dir / "index.html"
         )
         
         # Copy providers
@@ -375,20 +387,17 @@ class ProjectSetup:
                 "@mui/icons-material": "^6.1.10",
                 "@mui/material": "^6.1.10",
                 "@supabase/supabase-js": "^2.47.2",
-                "cra-template": "1.2.0",
                 "react": "^19.0.0",
                 "react-admin": "^5.4.1",
                 "react-dom": "^19.0.0",
-                "react-scripts": "5.0.1",
                 "recharts": "^2.14.1",
-                "react-router-dom": "^6.21.0",
                 "@mui/x-data-grid": "^7.23.2"
             },
             "scripts": {
-                "start": "react-scripts start",
-                "build": "react-scripts build",
-                "test": "react-scripts test",
-                "eject": "react-scripts eject"
+                "dev": "vite",
+                "build": "vite build",
+                "lint": "eslint .",
+                "preview": "vite preview"
             },
             "eslintConfig": {
                 "extends": ["react-app"]
@@ -396,6 +405,18 @@ class ProjectSetup:
             "browserslist": {
                 "production": [">0.2%", "not dead", "not op_mini all"],
                 "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+            },
+            "devDependencies": {
+                "@eslint/js": "^9.17.0",
+                "@types/react": "^18.3.18",
+                "@types/react-dom": "^18.3.5",
+                "@vitejs/plugin-react": "^4.3.4",
+                "eslint": "^9.17.0",
+                "eslint-plugin-react": "^7.37.2",
+                "eslint-plugin-react-hooks": "^5.0.0",
+                "eslint-plugin-react-refresh": "^0.4.16",
+                "globals": "^15.14.0",
+                "vite": "^6.0.5"
             }
         }
         
@@ -510,7 +531,15 @@ def save_domain_model(output_dir: Path, domain_model: Dict[str, Any]):
         json.dump(domain_model, f, indent=2)
     
     # Generate table prefix from directory name
-    table_prefix = f"app_{output_dir.name.lower()}"
+    backup_dir = output_dir / "backups"
+    if backup_dir.exists() and backup_dir.is_dir():
+        # Count existing projects in the backup folder
+        existing_projects = len([d for d in backup_dir.iterdir() if d.is_dir()])
+        version = f"v{existing_projects}"  # Set version based on existing projects
+    else:
+        version = "v0"  # No projects found, set version to v0
+
+    table_prefix = f"app_{output_dir.name.lower()}_{version}"  # Include version in the prefix
     
     # Create SQL directory
     sql_dir = output_dir / "sql"
@@ -627,7 +656,7 @@ def save_domain_model(output_dir: Path, domain_model: Dict[str, Any]):
     # Generate README
     generate_readme(output_dir, domain_model)
 
-def save_interface_model(output_dir: Path, interface_model: Dict[str, Any], domain_model: Dict[str, Any]):
+def save_interface_model(output_dir: Path, interface_model: Dict[str, Any], domain_model: Dict[str, Any], use_docker: bool = False, use_nginx: bool = False):
     """Save interface model and generate frontend code."""
     # Get prefix
     with open(output_dir / "prefix.txt", "r") as f:
@@ -654,9 +683,9 @@ def save_interface_model(output_dir: Path, interface_model: Dict[str, Any], doma
     
     # Create frontend .env file
     env_content = f"""
-REACT_APP_SUPABASE_URL={os.getenv('SUPABASE_PROJECT_URL')}
-REACT_APP_SUPABASE_ANON_KEY={os.getenv('SUPABASE_ANON_KEY')}
-REACT_APP_TABLE_PREFIX={prefix}
+VITE_SUPABASE_URL={os.getenv('SUPABASE_PROJECT_URL')}
+VITE_SUPABASE_ANON_KEY={os.getenv('SUPABASE_ANON_KEY')}
+VITE_TABLE_PREFIX={prefix}
 """
     with open(output_dir / "frontend/.env", "w") as f:
         f.write(env_content.strip())
@@ -674,57 +703,63 @@ REACT_APP_TABLE_PREFIX={prefix}
     try:
         # Setup database with domain model for mock data
         project_data = asyncio.run(project_setup.setup_database(domain_model))
+        print(f"\nData base setup complete! Hosting the app for preview.")
+        # After successful execution
+        if use_docker:
+            app_url = setup_docker_app(output_dir, output_dir.name, use_nginx)
+            if use_nginx:
+                print(f"\nApp deployed with Docker and Nginx at: {app_url}")
+            else:
+                print(f"\nApp deployed with Docker at: {app_url}")
+        else:
+            print("\nTo run the updated application:")
+            print(f"1. cd {output_dir}/frontend")
+            print("2. npm install")
+            print("3. npm run dev")
         
-        # Install dependencies
-        project_setup.install_dependencies()
-        
-        print(f"\nProject setup complete! To start the app:")
-        print(f"cd {output_dir}/frontend")
-        print("npm start")
+        print(f"\nProject setup complete!")
         
     except Exception as e:
         print(f"\nError during project setup: {e}")
         print("Please check the logs and try manual setup if needed.")
 
-def generate_view_sql(view: Dict[str, Any], prefix: str) -> str:
-    """Generate SQL for creating a view."""
-    view_name = f"{prefix}_{view['view_name']}"
+def generate_view_sql(view_def: Dict[str, Any], prefix: str) -> str:
+    """Generate SQL for a view definition"""
+    view_name = f"{prefix}_{view_def['view_name']}"
     
-    # Add prefix to table names in source_tables
-    source_tables = []
-    for table in view['source_tables']:
-        # Split on JOIN if present
-        parts = table.split('JOIN')
-        prefixed_parts = []
-        for part in parts:
-            # Add prefix to each table reference
-            words = part.strip().split(' ')
-            # Replace table name with prefixed version, keep aliases
-            words[0] = f" public.{prefix}_{words[0]} "
-            prefixed_parts.append(' '.join(words))
-        source_tables.append(' JOIN '.join(prefixed_parts))
-
-    columns = [
-        f"{col['transformation']} as {col['name']}"
-        for col in view['columns']
-    ]
+    # Build column list
+    columns = []
+    for col in view_def['columns']:
+        columns.append(f"{col['transformation']} as {col['name']}")
     
+    # Build FROM clause with proper JOINs
+    tables = view_def['source_tables']
+    from_clause = f"FROM {prefix}_{tables[0].split()[0]} {tables[0].split()[1]}"  # First table with alias
+    
+    # Add subsequent tables as JOINs if there are multiple tables
+    if len(tables) > 1:
+        for i in range(1, len(tables)):
+            table_parts = tables[i].split()
+            # Use join_condition for JOIN ... ON clause
+            from_clause += f"\nJOIN {prefix}_{table_parts[0]} {table_parts[1]} ON {view_def['join_condition']}"
+    
+    # Add WHERE clause if filters exist (separate from join conditions)
+    where_clause = f"\nWHERE {view_def['filters']}" if view_def.get('filters') else ""
+    
+    # Build SQL
     sql = f"""
-    -- Auto-generated view for {view['description']}
+    -- Auto-generated view for {view_def['description']}
     CREATE OR REPLACE VIEW public.{view_name} AS
     SELECT {', '.join(columns)}
-    FROM {' '.join(source_tables)}"""
-
-    if view.get('filters'):
-        sql += f"\nWHERE {view['filters']}"
-        
-    if view.get('group_by'):
-        sql += f"\nGROUP BY {', '.join(view['group_by'])}"
-
-    sql += ";\n"
+    {from_clause}
+    {where_clause}"""
+    
+    # Add GROUP BY if present
+    if view_def.get('group_by'):
+        sql += f"\nGROUP BY {', '.join(view_def['group_by'])}"
     
     # Add permissions
-    sql += f"""
+    sql += f""";\n
     -- Grant permissions
     GRANT SELECT ON public.{view_name} TO authenticated;
     GRANT SELECT ON public.{view_name} TO anon;
@@ -793,7 +828,8 @@ def generate_sql_schema(entity: Entity, prefix: str) -> str:
         
         col_def.append(postgres_type)
         
-        if row[primary_idx]:
+        primary_key_count = sum(1 for col in valid_rows if col[primary_idx])
+        if row[primary_idx] and (primary_key_count == 1 or row[name_idx] == 'id'):
             col_def.append("PRIMARY KEY")
             if postgres_type == 'UUID':
                 col_def.append("DEFAULT uuid_generate_v4()")
@@ -1166,3 +1202,259 @@ def save_partial_model(project_dir: Path, name: str, model: Union[BaseModel, Dic
             json.dump(model.model_dump(), f, indent=2)
         else:
             json.dump(model, f, indent=2) 
+
+def update_package_json_for_vite(app_path):
+    """Update package.json to include Vite configuration"""
+    frontend_dir = os.path.join(app_path, "frontend")
+    package_json_path = os.path.join(frontend_dir, "package.json")
+    
+    with open(package_json_path, "r") as f:
+        package_json = json.load(f)
+
+    # Add Vite dependencies
+    package_json["devDependencies"] = {
+        **package_json.get("devDependencies", {}),
+        "vite": "^4.0.0",
+        "@vitejs/plugin-react": "^4.0.0"
+    }
+
+    # Update scripts for Vite
+    package_json["scripts"] = {
+        **package_json.get("scripts", {}),
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    }
+
+    with open(package_json_path, "w") as f:
+        json.dump(package_json, f, indent=2)
+
+def create_vite_config(app_path, port):
+    """Create vite.config.js file"""
+    frontend_dir = os.path.join(app_path, "frontend")
+    config_content = f"""
+    import {{ defineConfig }} from 'vite'
+    import react from '@vitejs/plugin-react'
+
+    export default defineConfig({{
+        plugins: [react()],
+        server: {{
+            port: {port},
+            host: '0.0.0.0'
+        }},
+        resolve: {{
+            alias: {{
+                '@': '/src'
+            }}
+        }}
+    }})
+    """
+    with open(os.path.join(frontend_dir, "vite.config.js"), "w") as f:
+        f.write(config_content.strip())
+
+def get_next_port(start_port=3000):
+    """Get next available port by checking system ports."""
+    import socket
+    import subprocess
+    import platform
+
+    def is_port_in_use(port):
+        # Check if port is in use using netstat
+        try:
+            if platform.system().lower() == 'windows':
+                # Windows command
+                cmd = f'netstat -an | findstr :{port}'
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                return str(port) in result.stdout
+            else:
+                # Linux/Mac command
+                cmd = f'netstat -tuln | grep :{port}'
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+                return str(port) in result.stdout
+        except subprocess.SubprocessError:
+            # Fallback to socket check if netstat fails
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(('localhost', port))
+                    s.close()
+                    return False
+                except socket.error:
+                    return True
+
+    port = start_port
+    while is_port_in_use(port):
+        port += 1
+    
+    return port
+
+def create_docker_file(app_path, port):
+    """Create Dockerfile for the app"""
+    template_path = os.path.join(os.path.dirname(__file__), "../templates/Dockerfile.template")
+    with open(template_path, "r") as f:
+        template = Template(f.read())
+    
+    dockerfile_content = template.render(port=port)
+    # Save Dockerfile in main app directory
+    with open(os.path.join(app_path, "Dockerfile"), "w") as f:
+        f.write(dockerfile_content)
+
+def update_nginx_config(app_name: str, port: int, output_dir: Path) -> None:
+    """Update Nginx configuration and save to output directory"""
+    try:
+        # Get template path relative to this file
+        template_path = Path(__file__).parent.parent / "templates" / "nginx.conf.template"
+
+        if not template_path.exists():
+            raise FileNotFoundError(f"Nginx template not found at {template_path}")
+
+        with open(template_path, "r") as f:
+            template = Template(f.read())
+
+        # Add upstream server
+        app_servers = f"upstream {app_name} {{ server localhost:{port}; }}"
+
+        # Add location block
+        location_block = f"""
+        location /{app_name} {{
+            proxy_pass http://{app_name};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }}
+        """
+
+        # Render template
+        nginx_conf = template.render(
+            worker_processes=1,
+            worker_connections=1024,
+            app_servers=app_servers,
+            location_blocks=location_block,
+            log_error_path=str((output_dir / "logs" / "error.log").resolve()),
+            log_access_path=str((output_dir / "logs" / "access.log").resolve())
+        )
+
+        # Ensure logs directory exists
+        logs_dir = output_dir / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save to output directory
+        nginx_conf_path = output_dir / "nginx.conf"
+        with open(nginx_conf_path, "w") as f:
+            f.write(nginx_conf)
+
+        print(f"Nginx configuration saved to {nginx_conf_path}")
+
+        # Convert Path to string for subprocess
+        nginx_conf_str = str(nginx_conf_path.resolve())
+
+        # Reload nginx configuration
+        if os.name == 'nt':  # Windows
+            try:
+                # First test the configuration
+                subprocess.run(["nginx", "-t", "-c", nginx_conf_str], check=True, capture_output=True, text=True)
+                # Then reload if test passes
+                subprocess.run(["nginx", "-s", "reload"], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Nginx error: {e.stderr}")
+                raise
+        else:  # Linux/Mac
+            try:
+                # First test the configuration
+                subprocess.run(["sudo", "nginx", "-t", "-c", nginx_conf_str], check=True, capture_output=True, text=True)
+                # Then reload if test passes
+                subprocess.run(["sudo", "nginx", "-s", "reload"], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Nginx error: {e.stderr}")
+                raise
+
+        print("Nginx configuration reloaded successfully")
+
+    except Exception as e:
+        print(f"Error updating Nginx configuration: {e}")
+        return
+
+def setup_docker_app(app_path, app_name):
+    """Setup Docker and Nginx for the app"""
+    frontend_dir = os.path.join(app_path, "frontend")
+    # Get next available port
+    port = get_next_port()
+    
+    # Update package.json for Vite
+    try:
+        update_package_json_for_vite(app_path)
+        print("Updated package.json for Vite successfully.")
+    except Exception as e:
+        print(f"Failed to update package.json for Vite: {e}")
+        return
+    
+    # Create Vite config
+    try:
+        create_vite_config(app_path, port)
+        print("Created Vite config successfully.")
+    except Exception as e:
+        print(f"Failed to create Vite config: {e}")
+        return
+    
+    # Stop and remove the Docker container
+    try:
+        subprocess.run(["docker", "stop", app_name], check=True)
+        print("Docker container stopped successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to stop Docker container: {e}")
+        return
+
+    try:
+        subprocess.run(["docker", "system", "prune", "-af"], check=True)
+        print("Docker container removed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to remove Docker container: {e}")
+        return
+
+
+    # Create Dockerfile in main app directory
+    try:
+        create_docker_file(app_path, port)
+        print("Created Dockerfile successfully.")
+    except Exception as e:
+        print(f"Failed to create Dockerfile: {e}")
+        return
+    
+    # Build and run Docker container from main app directory
+    # Note: We're using app_path here instead of frontend_dir
+    try:
+        subprocess.run(["docker", "build", "-t", f"{app_name}-app", app_path], check=True)
+        print("Docker build completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Docker build failed: {e}")
+        return
+    
+    try:
+        subprocess.run(
+            ["docker", "run", "-d", "-p", f"{port}:{port}", "--name", app_name, f"{app_name}-app"],
+            check=True
+        )
+        print("Docker container started successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Docker container start failed: {e}")
+        return
+    
+    # Update Nginx config
+    try:
+        update_nginx_config(app_name, port, app_path)
+        print("Nginx configuration updated successfully.")
+    except Exception as e:
+        print(f"Failed to update Nginx configuration: {e}")
+        return
+    
+    return f"http://localhost/{app_name}"
+
+# Modify existing handle_output function to include Docker setup
+def handle_output(output_dir, app_name):
+    # ... existing code ...
+    
+    # Setup Docker and Nginx
+    app_url = setup_docker_app(output_dir, app_name)
+    
+    print(f"App deployed successfully at: {app_url}")
+    return app_url 

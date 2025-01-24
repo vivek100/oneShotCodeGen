@@ -24,6 +24,5 @@ class UpdateStrategy(BaseModel):
     model_config = ConfigDict(extra="forbid")
     strategy_type: Literal["full_regeneration", "use_case_update", "partial_update"]
     reasoning: str
-    required_generators: List[str]
-    change_summary: Optional[Dict[str, ChangeRequirements]]
+    change_summary: Optional[List[str]]
     starter_prompt: Optional[str]  # For full regeneration 

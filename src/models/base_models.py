@@ -230,6 +230,7 @@ class ViewDefinition(BaseModel):
     source_tables: List[str]
     columns: Optional[List[Dict[str, str]]]
     group_by: Optional[List[str]]
+    join_condition: Optional[str]
     filters: Optional[str]
     description: Optional[str]
 
@@ -268,5 +269,3 @@ class ApplicationInterface(BaseModel):
     model_config = ConfigDict(extra="forbid", exclude_none=True)
     pages: List[Union[DashboardPage, ResourcePage, CustomPage]]
     views: Optional[List[ViewDefinition]]
-    
-    

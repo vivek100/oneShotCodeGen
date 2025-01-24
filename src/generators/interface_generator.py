@@ -157,6 +157,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
        - Don't use: `DATE_FORMAT`, `MONTH()`, or other non-PostgreSQL functions
     5. **Aggregations**: Always include proper GROUP BY clauses
     6. **Joins**: Use explicit JOIN syntax with proper conditions
+    7. **Filters**: Use explicit filters with proper conditions
    
     
     Example View Definition:
@@ -176,6 +177,23 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
       ],
       "filters": "e.created_at IS NOT NULL",
       "group_by": ["DATE_TRUNC('month', e.created_at)"]
+    }
+        {
+      "view_name": "category_expenses",
+      "description": "Aggregates total expenses by category",
+      "source_tables": ["expenses e", "categories c"],
+      "columns": [
+        {
+          "name": "category_name",
+          "transformation": "c.name"
+        },
+        {
+          "name": "total_expenses",
+          "transformation": "SUM(e.amount)"
+        }
+      ],
+      "join_condition": "e.category_id = c.id",
+      "group_by": ["c.name"]
     }
     """
     example_output = """
@@ -335,6 +353,7 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
         - ensure no provider is missed it should be mapped to either a base table or a view
         - do not create views for base tables, the entity table can already be queried directly
     4. Ensures a consistent and intuitive user experience
+    5. While generating the views if there is a group clause ensure to use the correct reference of the table in the group by clause, the column used shoud be present in the table. You reference the column names present in a table from the entities data.
    """
     
     result = generator(prompt)

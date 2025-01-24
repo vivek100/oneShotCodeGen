@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
 import outlines
-from typing import Dict, Any
+from typing import Dict, Any, List
 from ..models.edit_flow_models import UpdateStrategy
+from ..models.base_models import UseCaseModel
 from .prompts.edit_prompt import EditPrompt
 
 load_dotenv()
@@ -14,19 +15,21 @@ class EditFlowAI:
             api_key=os.getenv("OPENAI_API_KEY")
         )
 
-    async def evaluate_changes(self, change_request: Dict[str, Any], 
-                             original_context: Dict[str, Any]) -> UpdateStrategy:
+    def evaluate_changes(self, change_request: Dict[str, Any], 
+                        original_context: Dict[str, Any]) -> UpdateStrategy:
         """Evaluate changes and determine strategy"""
         generator = outlines.generate.json(self.model, UpdateStrategy)
         prompt = EditPrompt.get_strategy_prompt(change_request, original_context)
         return generator(prompt)
 
-    def enhance_generator_prompt(self, generator_type: str, original_prompt: str,
-                               change_requirements: Dict[str, Any], 
-                               existing_model: Dict[str, Any]) -> str:
-        """Enhance existing generator prompts with change context"""
-        return EditPrompt.enhance_generator_prompt(
-            original_prompt,
-            change_requirements,
-            existing_model
-        ) 
+    def generate_updated_use_cases(self, app_info: Dict[str, Any], 
+                                 existing_use_cases: List[Dict[str, Any]], 
+                                 change_summary: List[str]) -> UseCaseModel:
+        """Generate updated use cases incorporating changes"""
+        generator = outlines.generate.json(self.model, UseCaseModel)
+        prompt = EditPrompt.get_use_case_update_prompt(
+            app_info,
+            existing_use_cases,
+            change_summary
+        )
+        return generator(prompt)

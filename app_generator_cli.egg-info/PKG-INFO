@@ -1,7 +1,8 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: app-generator-cli
 Version: 0.1.0
 Requires-Python: >=3.8
+License-File: LICENSE
 Requires-Dist: typer[all]==0.9.0
 Requires-Dist: pydantic==2.6.1
 Requires-Dist: numpy
@@ -16,3 +17,5 @@ Requires-Dist: rich-click==1.7.3
 Requires-Dist: inquirer==3.2.4
 Requires-Dist: colorama==0.4.6
 Requires-Dist: openai
+Dynamic: requires-dist
+Dynamic: requires-python

@@ -4,18 +4,20 @@ A command-line interface tool for generating full-stack applications with React 
 
 ## Updates
 
+- 2024-01-17 (Docker & Nginx Integration):
+    - Added Docker and Nginx deployment options for both create and edit flows
+    - Support for containerized deployment with optional Nginx reverse proxy
+    - Automatic port management and container configuration
+    - Simplified deployment process with single command setup
+
 - 2024-01-16 (Edit Flow):
     - Introduced intelligent update strategies for modifying existing applications
+    - Added versioning support for application updates
     - Supports two main update approaches:
         - Full Regeneration: Complete rebuild while preserving core functionality
-        - Partial Update: Targeted modifications to specific components
+        - Use Case Update: Targeted modifications to specific components
     - Smart backup system that creates timestamped backups before changes
-    - Modular update system supporting changes to:
-        - Use cases and business logic
-        - Entity models and relationships
-        - Mock data and test users
-        - Interface components and layouts
-    - Context-aware updates that maintain consistency across all application layers and the frontend
+    - Version tracking for multiple iterations of the same application
 
 - 2024-01-10 (Optimized AI Generation Pipeline):
     - Restructured AI generation from 2 calls to 4 specialized calls:
@@ -53,11 +55,49 @@ A command-line interface tool for generating full-stack applications with React 
 - Python 3.8 or higher
 - Node.js and npm
 - Supabase account
+- Docker (optional, for containerized deployment)
+- Nginx (optional, for reverse proxy)
+
+## Docker & Nginx Setup
+
+1. Install Docker:
+```bash
+# For Ubuntu
+sudo apt-get update
+sudo apt-get install docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# For macOS/Windows
+Download and install Docker Desktop from https://www.docker.com/products/docker-desktop
+```
+
+2. Install Nginx:
+```bash
+# For Ubuntu
+sudo apt-get install nginx
+sudo systemctl start nginx
+sudo systemctl enable nginx
+
+# For macOS
+brew install nginx
+
+# For Windows
+Download and install Nginx from http://nginx.org/en/download.html
+```
+
+3. Configure Nginx user permissions (Linux/macOS):
+```bash
+# Add your user to nginx group
+sudo usermod -aG nginx $USER
+# Ensure nginx config directory is writable
+sudo chown -R $USER:$USER /etc/nginx/conf.d
+```
 
 ## Installation
 
 1. Clone the repository
-2. Install the package: `pip install .`
+2. Install the package: `pip install -r requirements.txt`
 
 
 ## Usage
@@ -75,33 +115,81 @@ ALTER ROLE authenticator SET pgrst.db_aggregates_enabled = 'true';
 NOTIFY pgrst, 'reload config';
 ```
 
-2. Generate an application:
-
-a. Using the new optimized pipeline (recommended):
-``` bash
+2. Generate an application with Docker:
+```bash
+a. Latest version
+# Just code generation
 python -m src.cli create "Create an expense tracker app"
-```
 
+# With Docker only
+python -m src.cli create "Create an expense tracker app" --docker
+
+# With Docker and Nginx
+python -m src.cli create "Create an expense tracker app" --docker --nginx
+```
 b. Using legacy mode (2-call approach):
 ``` bash
 python -m src.cli create "Create an expense tracker app" --use-legacy
 ```
 c. Adding custom output directory:
 ``` bash
-python -m src.cli create "Create an expense tracker app" --output-dir "path/to/outputfolder"
+python -m src.cli create "Create an expense tracker app" --output-dir "path/to/
+outputfolder"
 ```
-d. Edit an existing application:
+3. Edit an existing application with Docker:
+```bash
+# Just code generation
+python -m src.cli edit <project_dir> --description "Add a dashboard for expense 
+analytics"
+# With Docker only
+python -m src.cli edit <project_dir> --description "Add a dashboard" --docker
 
-Using command line description:
-``` bash
-python -m src.cli edit <project_dir> --description "Add a dashboard for expense analytics"
+# With Docker and Nginx
+python -m src.cli edit <project_dir> --description "Add a dashboard" --docker --nginx
 ```
 
-Once generated, you can run the frontend by running `npm start` in the frontend directory:
-``` bash
+3. Running the application:
+
+a. Local Development (Default):
+```bash
 cd output/{output_folder_name}/frontend
-npm start
+npm install
+npm run dev
 ```
+
+b. Docker Deployment:
+- Application will be available at `http://localhost:<port>`
+- Port is automatically assigned and displayed after deployment
+
+c. Docker with Nginx:
+- Application will be available at `http://localhost/{app_name}`
+- Nginx handles routing and load balancing
+
+## Deployment Options
+
+1. **Local Development**
+   - Direct npm-based development server
+   - Best for development and testing
+   - Hot-reloading enabled
+
+2. **Docker Deployment**
+   - Containerized application
+   - Isolated environment
+   - Automatic port management
+   - Suitable for production
+
+3. **Docker with Nginx**
+   - Reverse proxy configuration
+   - Path-based routing
+   - Load balancing capability
+   - Enhanced production setup
+
+## Version Control
+
+- Applications now include version tracking
+- Version format: v0, v1, v2, etc.
+- Version number increments based on backup history
+- Helps track multiple iterations of the same application
 
 ## Project Structure
 ``` bash

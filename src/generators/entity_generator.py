@@ -30,11 +30,7 @@ def generate_entities(description: str, use_case_model: UseCaseModel) -> EntityM
                 "name": "expenses",
                 "description": "Stores expense records",
                 "columns": {{
-                    "headers": [
-                        "name", "data_type", "is_primary", "is_nullable", "is_unique",
-                        "default", "auto_increment", "is_foreign", "foreign_table",
-                        "foreign_column", "on_delete", "on_update"
-                    ],
+                    "headers": ["name", "data_type", "is_primary", "is_nullable", "is_unique","default", "auto_increment", "is_foreign", "foreign_table", "foreign_column", "on_delete", "on_update"],
                     "rows": [
                         ["id", "uuid", true, false, true, "gen_random_uuid()", false, false, null, null, null, null],
                         ["amount", "float", false, false, false, null, false, false, null, null, null, null],
@@ -67,11 +63,7 @@ def generate_entities(description: str, use_case_model: UseCaseModel) -> EntityM
                 "name": "categories",
                 "description": "Stores expense categories",
                 "columns": {{
-                    "headers": [
-                        "name", "data_type", "is_primary", "is_nullable", "is_unique",
-                        "default", "auto_increment", "is_foreign", "foreign_table",
-                        "foreign_column", "on_delete", "on_update"
-                    ],
+                    "headers": ["name", "data_type", "is_primary", "is_nullable", "is_unique","default", "auto_increment", "is_foreign", "foreign_table", "foreign_column", "on_delete", "on_update"],
                     "rows": [
                         ["id","uuid",true,false,true,"gen_random_uuid()",false,false,null,null,null,null],
                         ["name","varchar",false,false,true,null,false,false,null,null,null,null],
@@ -97,10 +89,10 @@ def generate_entities(description: str, use_case_model: UseCaseModel) -> EntityM
     }}
 
     Ensure:
-    1. All entities needed for the use cases are created, please do not miss any entity. Ensure entities are correct and dont have multiple primary keys.
+    1. All entities needed for the use cases are created, please do not miss any entity. Ensure entities are correct and dont have multiple columns with is_primary as set to true.
         - Following are the column headers for all entities for each column we need details for each of these keys, name is the column name key:
         "headers": ["name", "data_type", "is_primary", "is_nullable", "is_unique","default", "auto_increment", "is_foreign", "foreign_table", "foreign_column", "on_delete", "on_update"]
-        - make sure "is_primary" is true for only one column in each entity, we can not have multiple primary keys
+        - Always add an id column with "is_primary" set to true for each entity, also ensure other columns that are not id should not have "is_primary" set to true instead use is_unique constraint if needed.
         - while defining foregin key relationships, if its a user id(type is uuid) field map it to profiles table id column. In mock data you can pass acutal email as user id, but dont get confused with the user id, we will map the correct user's id while creating the sql files. Just make sure the user with the email is present in mock users data.
         - Do not create emtpy columns in the entities
     2. All relationships between entities are properly defined, do not miss any relationship and make sure to reference the correct columns and column types match with the foreign entities.
@@ -108,6 +100,7 @@ def generate_entities(description: str, use_case_model: UseCaseModel) -> EntityM
     4. We also have the profiles(Do not create this entity) table already created with folowing columns,: id, email, full_name, created_at, updated_at(created_at and updated_at are auto generated columns, you dont need to add them in the mock data)
     5. Do not create emtpy columns in the entities
     6. For check constraints, make sure column data type is correct and the constraints are correct.
+    7. Do not use reserved keywaords in postgres like "limit", "month", "year" etc. as column names add a prefix to them like "budget_limit", "budget_month", "budget_year" etc.
     """
     
     result = generator(prompt)

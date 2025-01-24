@@ -1,0 +1,22 @@
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream app_servers {
+        # Dynamic app servers will be added here
+        {{ app_servers }}
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Dynamic location blocks will be added here
+        {{ location_blocks }}
+
+        location / {
+            return 404;
+        }
+    }
+} 

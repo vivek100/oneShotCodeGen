@@ -1,0 +1,11 @@
+FROM base-image
+WORKDIR /base
+
+# Copy the entire app
+COPY frontend /base/
+
+# Expose Vite dev server port
+EXPOSE {{ port }}
+
+# Start Vite dev server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "{{ port }}"] 
