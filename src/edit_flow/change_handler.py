@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Dict, Any
-from ..models.edit_flow_models import ChangeRequest, UpdateStrategy
-from .ai_integration import EditFlowAI
-from ..utils.context_loader import ContextLoader
+from models.edit_flow_models import ChangeRequest, UpdateStrategy
+from edit_flow.ai_integration import EditFlowAI
+from utils.context_loader import ContextLoader
 
 class ChangeHandler:
     def __init__(self, project_dir: Path):

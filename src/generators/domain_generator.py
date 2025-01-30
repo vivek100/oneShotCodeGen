@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any
-from ..models.base_models import ApplicationDomain
+from models.base_models import ApplicationDomain
 
 load_dotenv()
 

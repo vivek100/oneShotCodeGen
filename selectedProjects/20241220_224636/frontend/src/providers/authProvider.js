@@ -1,4 +1,5 @@
 import { supabase } from "../supabase";
+
 export const authProvider = {
   login: async ({ username, password }) => {
     const { user, error } = await supabase.auth.signInWithPassword({
@@ -28,5 +29,18 @@ export const authProvider = {
   getPermissions: async () => {
     const { data: user } = await supabase.auth.getUser();
     return user ? Promise.resolve(user.role) : Promise.reject();
+  },
+  getIdentity: async () => {
+    const { data: user, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      return Promise.reject('No user identity found');
+    }
+    console.log("user found", user.user.id);
+    return Promise.resolve({
+      id: user.user.id,
+      fullName: user.user.user_metadata?.full_name || user.user.email,
+      email: user.user.email,
+      avatar: user.user.user_metadata?.avatar_url,
+    });
   },
 };

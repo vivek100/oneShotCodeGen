@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any
-from ..models.base_models import EntityModel, UseCaseModel
+from models.base_models import EntityModel, UseCaseModel
 
 load_dotenv()
 
@@ -101,6 +101,7 @@ def generate_entities(description: str, use_case_model: UseCaseModel) -> EntityM
     5. Do not create emtpy columns in the entities
     6. For check constraints, make sure column data type is correct and the constraints are correct.
     7. Do not use reserved keywaords in postgres like "limit", "month", "year" etc. as column names add a prefix to them like "budget_limit", "budget_month", "budget_year" etc.
+    8. if for a app you feel there is a need to track user details like name, phone number, address, etc. add a "user_details" table and add the columns to the entity. Do not use profiles table, profile table is only for tracking logged in users details.
     """
     
     result = generator(prompt)

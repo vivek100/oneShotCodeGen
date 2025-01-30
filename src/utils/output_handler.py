@@ -9,7 +9,7 @@ from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader, Template
-from ..models.base_models import Entity, MockData, MockUser
+from models.base_models import Entity, MockData, MockUser
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from urllib.parse import urlparse
@@ -88,7 +88,9 @@ class ProjectSetup:
         load_dotenv()
         
         # Get schema prefix from directory name - add 'app_' prefix to ensure valid SQL identifier
-        self.schema_prefix = f"app_{output_dir.name.replace('-', '_')}"
+        with open(output_dir / "prefix.txt", "r") as f:
+            prefix = f.read().strip()
+        self.schema_prefix = prefix
         
         # Supabase connection details
         self.supabase_url = os.getenv("SUPABASE_PROJECT_URL")
@@ -122,9 +124,6 @@ class ProjectSetup:
             cur = conn.cursor()
 
             try:
-                # Save schema prefix
-                with open(self.output_dir / "prefix.txt", "w") as f:
-                    f.write(self.schema_prefix)
 
                 # Run SQL scripts in order
                 sql_dir = self.output_dir / "sql"
@@ -711,6 +710,8 @@ VITE_TABLE_PREFIX={prefix}
                 print(f"\nApp deployed with Docker and Nginx at: {app_url}")
             else:
                 print(f"\nApp deployed with Docker at: {app_url}")
+
+            return app_url
         else:
             print("\nTo run the updated application:")
             print(f"1. cd {output_dir}/frontend")
@@ -732,18 +733,32 @@ def generate_view_sql(view_def: Dict[str, Any], prefix: str) -> str:
     for col in view_def['columns']:
         columns.append(f"{col['transformation']} as {col['name']}")
     
-    # Build FROM clause with proper JOINs
-    tables = view_def['source_tables']
-    from_clause = f"FROM {prefix}_{tables[0].split()[0]} {tables[0].split()[1]}"  # First table with alias
+    # Handle source tables with fallback for comma-separated strings
+    tables = []
+    for table_entry in view_def['source_tables']:
+        # Check if the table entry contains a comma (multiple tables in one string)
+        if ',' in table_entry:
+            # Split and process each table
+            table_parts = table_entry.split(',')
+            for part in table_parts:
+                table_def = part.strip().split()
+                if len(table_def) >= 2:
+                    tables.append(f"{prefix}_{table_def[0]} {table_def[1]}")
+        else:
+            # Original flow for single table entries
+            table_def = table_entry.strip().split()
+            if len(table_def) >= 2:
+                tables.append(f"{prefix}_{table_def[0]} {table_def[1]}")
     
-    # Add subsequent tables as JOINs if there are multiple tables
-    if len(tables) > 1:
-        for i in range(1, len(tables)):
-            table_parts = tables[i].split()
-            # Use join_condition for JOIN ... ON clause
-            from_clause += f"\nJOIN {prefix}_{table_parts[0]} {table_parts[1]} ON {view_def['join_condition']}"
+    # Build FROM clause
+    from_clause = f"FROM {tables[0]}"  # First table
     
-    # Add WHERE clause if filters exist (separate from join conditions)
+    # Add JOINs for additional tables if join condition exists
+    if len(tables) > 1 and view_def.get('join_condition'):
+        for table in tables[1:]:
+            from_clause += f"\nJOIN {table} ON {view_def['join_condition']}"
+    
+    # Add WHERE clause if filters exist
     where_clause = f"\nWHERE {view_def['filters']}" if view_def.get('filters') else ""
     
     # Build SQL
@@ -751,15 +766,15 @@ def generate_view_sql(view_def: Dict[str, Any], prefix: str) -> str:
     -- Auto-generated view for {view_def['description']}
     CREATE OR REPLACE VIEW public.{view_name} AS
     SELECT {', '.join(columns)}
-    {from_clause}
-    {where_clause}"""
+    {from_clause}{where_clause}"""
     
     # Add GROUP BY if present
     if view_def.get('group_by'):
         sql += f"\nGROUP BY {', '.join(view_def['group_by'])}"
     
     # Add permissions
-    sql += f""";\n
+    sql += f""";
+
     -- Grant permissions
     GRANT SELECT ON public.{view_name} TO authenticated;
     GRANT SELECT ON public.{view_name} TO anon;
@@ -1374,7 +1389,7 @@ def update_nginx_config(app_name: str, port: int, output_dir: Path) -> None:
         print(f"Error updating Nginx configuration: {e}")
         return
 
-def setup_docker_app(app_path, app_name):
+def setup_docker_app(app_path, app_name, use_nginx=False):
     """Setup Docker and Nginx for the app"""
     frontend_dir = os.path.join(app_path, "frontend")
     # Get next available port
@@ -1398,18 +1413,16 @@ def setup_docker_app(app_path, app_name):
     
     # Stop and remove the Docker container
     try:
-        subprocess.run(["docker", "stop", app_name], check=True)
+        subprocess.run(["docker", "stop", f"{app_name}-app"], check=True)
         print("Docker container stopped successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to stop Docker container: {e}")
-        return
+        print(f"Failed to stop Docker container: {e}, it may already be stopped or not running. Continuing...")
 
     try:
-        subprocess.run(["docker", "system", "prune", "-af"], check=True)
-        print("Docker container removed successfully.")
+        subprocess.run(["docker", "rmi", app_name], check=True)
+        print("Docker image removed successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"Failed to remove Docker container: {e}")
-        return
+        print(f"Failed to remove Docker container: {e}, it may already be removed or never existed. Continuing...")
 
 
     # Create Dockerfile in main app directory
@@ -1440,21 +1453,23 @@ def setup_docker_app(app_path, app_name):
         return
     
     # Update Nginx config
-    try:
-        update_nginx_config(app_name, port, app_path)
-        print("Nginx configuration updated successfully.")
-    except Exception as e:
-        print(f"Failed to update Nginx configuration: {e}")
-        return
+    if use_nginx:
+        try:
+            update_nginx_config(app_name, port, app_path)
+            print("Nginx configuration updated successfully.")
+            return f"http://localhost/{app_name}"
+        except Exception as e:
+            print(f"Failed to update Nginx configuration: {e}")
+            return
     
-    return f"http://localhost/{app_name}"
+    return f"http://localhost:{port}"
 
 # Modify existing handle_output function to include Docker setup
 def handle_output(output_dir, app_name):
     # ... existing code ...
     
     # Setup Docker and Nginx
-    app_url = setup_docker_app(output_dir, app_name)
+    app_url = setup_docker_app(output_dir, app_name, use_nginx)
     
     print(f"App deployed successfully at: {app_url}")
     return app_url 

@@ -1,17 +1,11 @@
-import os, json
+import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any
-from ..models.base_models import ApplicationInterface
-from typing import List, Optional, Union, Literal, Dict, Annotated
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-import outlines,json
-from typing import List, Optional, Union, Literal
-from pydantic import BaseModel, RootModel, ConfigDict
+from models.base_models import ApplicationInterface
 from typing import List, Optional, Union, Literal, Dict, Any
-from pydantic import BaseModel, ConfigDict, RootModel
 
-load_dotenv()
+load_dotenv() 
 
 def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -150,8 +144,9 @@ def generate_interface(domain_model: Dict[str, Any]) -> Dict[str, Any]:
     2. **Column References**: Always use the full column name with table alias
        - Correct: `e.created_at`, `c.name`
        - Incorrect: `date`, `name`
-    3. **Table References**: Use the table name pass in the Entities
+    3. **Table References**: Use the table name passed in the Entitie
        - Correct: `expenses`, `categories`
+       - pass it in source_tables as a list of strings
     4. **Date Functions**: Use PostgreSQL standard functions
        - Use: `DATE_TRUNC('month', e.created_at)`
        - Don't use: `DATE_FORMAT`, `MONTH()`, or other non-PostgreSQL functions

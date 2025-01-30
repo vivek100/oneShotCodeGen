@@ -2,9 +2,9 @@ import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any, List
-from ..models.edit_flow_models import UpdateStrategy
-from ..models.base_models import UseCaseModel
-from .prompts.edit_prompt import EditPrompt
+from models.edit_flow_models import UpdateStrategy
+from models.base_models import UseCaseModel
+from edit_flow.prompts.edit_prompt import EditPrompt
 
 load_dotenv()
 

@@ -6,13 +6,13 @@ output/
 venv/
 #ignore app-generator-cli.egg-info folder
 app-generator-cli.egg-info/
+app_generator_cli.egg-info/
+build/
 #ignore all files in the .gitignore file
 .gitignore
 
 #ignore all node_modules in the selected frontend folder
-selectedProjects/20241220_224636/frontend/node_modules/
-selectedProjects/20241220_224636/frontend/.env
-selectedProjects/20241220_224636/frontend/package-lock.json
-selectedProjects/20241219_001418/frontend/node_modules/
-selectedProjects/20241219_001418/frontend/.env
-selectedProjects/20241219_001418/frontend/package-lock.json
+selectedProjects/
+__pycache__/
+test_output/
+src/templates/public/

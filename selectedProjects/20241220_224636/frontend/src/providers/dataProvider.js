@@ -2,7 +2,7 @@ import { supabase } from "../supabase";
 
 // Get table prefix from environment variable
 const prefix = process.env.REACT_APP_TABLE_PREFIX;
-
+console.log("prefix", prefix);
 export const dataProvider = {
   getList: async (
     resource,

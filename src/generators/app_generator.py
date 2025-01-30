@@ -1,6 +1,6 @@
 from typing import Dict, Any, Tuple
-from .domain_generator import generate_domain
-from .interface_generator import generate_interface
+from generators.domain_generator import generate_domain
+from generators.interface_generator import generate_interface
 
 def generate_app(description: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """

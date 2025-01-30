@@ -5,20 +5,26 @@ import json
 import logging
 from rich.console import Console
 from typing import Dict, Any
-from ..models.edit_flow_models import UpdateStrategy
-from ..utils.context_loader import ContextLoader
-from ..utils.output_handler import (
+from models.edit_flow_models import UpdateStrategy
+from utils.context_loader import ContextLoader
+from utils.output_handler import (
     save_partial_model,
     save_domain_model,
     save_interface_model
 )
-from ..models.base_models import UseCaseModel, EntityModel, MockUserModel, MockDataModel, ApplicationDomain
-from ..generators.use_case_generator import generate_use_cases
-from ..generators.entity_generator import generate_entities
-from ..generators.mock_user_generator import generate_mock_users
-from ..generators.mock_data_generator import generate_mock_data
-from ..generators.interface_generator import generate_interface
-from ..edit_flow.ai_integration import EditFlowAI
+from models.base_models import (
+    UseCaseModel, 
+    EntityModel, 
+    MockUserModel, 
+    MockDataModel, 
+    ApplicationDomain
+)
+from generators.use_case_generator import generate_use_cases
+from generators.entity_generator import generate_entities
+from generators.mock_user_generator import generate_mock_users
+from generators.mock_data_generator import generate_mock_data
+from generators.interface_generator import generate_interface
+from edit_flow.ai_integration import EditFlowAI
 
 def combine_models(
     use_case_model: UseCaseModel,
@@ -48,6 +54,9 @@ class StrategyExecutor:
         self.backup_dir = project_dir / "backups" / self._get_backup_name()
         self.console = Console()
         self.logger = logging.getLogger(__name__)
+        self.use_docker = use_docker
+        self.use_nginx = use_nginx
+        self.use_cases = None
     
     def _get_backup_name(self) -> str:
         """Generate backup directory name"""
@@ -59,11 +68,17 @@ class StrategyExecutor:
         
         try:
             if self.strategy.strategy_type == "full_regeneration":
-                self._execute_full_regeneration()
+                url = self._execute_full_regeneration()
             elif self.strategy.strategy_type == "use_case_update":
-                self._execute_use_case_update()
+                url = self._execute_use_case_update()
             else:
                 raise ValueError(f"Unknown strategy type: {self.strategy.strategy_type}")
+            
+            return {
+                "backup_dir": str(self.backup_dir),
+                "preview_url": url,
+                "use_cases": self.use_cases
+            }
         except Exception as e:
             self._restore_backup()
             raise Exception(f"Strategy execution failed: {str(e)}")
@@ -85,7 +100,8 @@ class StrategyExecutor:
                 use_case_model = generate_use_cases(description)
                 save_partial_model(self.project_dir, "use_cases", use_case_model)
                 self.console.print("[green]✓[/green] Use cases generated")
-                
+                self.use_cases = use_case_model
+
                 # Step 2: Entities
                 self.logger.info("Generating entities")
                 self.console.print("Generating entities...")
@@ -129,11 +145,13 @@ class StrategyExecutor:
                 
                 # Save final models
                 save_domain_model(self.project_dir, domain_model)
-                save_interface_model(self.project_dir, interface_model, domain_model, self.use_docker, self.use_nginx)
+                url = save_interface_model(self.project_dir, interface_model, domain_model, self.use_docker, self.use_nginx)
                 self.console.print("[green]✓[/green] Models combined and interface generated")
                 
                 self.logger.info("Full regeneration completed successfully")
                 self.console.print("[bold green]Full regeneration completed successfully![/bold green]")
+
+                return url
                 
             except Exception as e:
                 error_msg = f"Error during full regeneration: {str(e)}"
@@ -174,7 +192,7 @@ class StrategyExecutor:
                 )
                 save_partial_model(self.project_dir, "use_cases", use_case_model)
                 self.console.print("[green]✓[/green] Use cases updated")
-                
+                self.use_cases = use_case_model
                 # Continue with generation flow...
                 # (Same as full regeneration from Step 2 onwards)
                 # Step 2: Entities
@@ -220,14 +238,16 @@ class StrategyExecutor:
                     mock_data_model
                 )
                 interface_model = generate_interface(domain_model)
-                
+
                 # Save final models
                 save_domain_model(self.project_dir, domain_model)
-                save_interface_model(self.project_dir, interface_model, domain_model, self.use_docker, self.use_nginx)
+                url = save_interface_model(self.project_dir, interface_model, domain_model, self.use_docker, self.use_nginx)
                 self.console.print("[green]✓[/green] Models combined and interface generated")
                 
                 self.logger.info("Use case update completed successfully")
                 self.console.print("[bold green]Use case update completed successfully![/bold green]")
+
+                return url
                 
             except Exception as e:
                 error_msg = f"Error during use case update: {str(e)}"

@@ -4,28 +4,33 @@ from datetime import datetime
 from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Callable
 import traceback
 import json
 import asyncio
 import click
+import shutil
+import nest_asyncio
+nest_asyncio.apply()
 
-from .models.base_models import UseCaseModel, EntityModel, MockUserModel, MockDataModel, ApplicationDomain
-from .generators.app_generator import generate_app
-from .generators.use_case_generator import generate_use_cases
-from .generators.entity_generator import generate_entities
-from .generators.mock_user_generator import generate_mock_users
-from .generators.mock_data_generator import generate_mock_data
-from .generators.interface_generator import generate_interface
-from .utils.output_handler import (
+
+from models.base_models import UseCaseModel, EntityModel, MockUserModel, MockDataModel, ApplicationDomain
+from generators.app_generator import generate_app
+from generators.use_case_generator import generate_use_cases
+from generators.entity_generator import generate_entities
+from generators.mock_user_generator import generate_mock_users
+from generators.mock_data_generator import generate_mock_data
+from generators.interface_generator import generate_interface
+from utils.output_handler import (
     create_output_directory,
     save_domain_model,
     save_interface_model,
     setup_logging,
-    save_partial_model
+    save_partial_model,
+    setup_docker_app
 )
-from .edit_flow.change_handler import ChangeHandler, ChangeRequest
-from .edit_flow.strategy_executor import StrategyExecutor
+from edit_flow.change_handler import ChangeHandler, ChangeRequest
+from edit_flow.strategy_executor import StrategyExecutor
 
 app = typer.Typer()
 console = Console()
@@ -253,6 +258,177 @@ def edit(
             logger.error(error_message)
             logger.error(f"Full traceback:\n{full_traceback}")
             raise typer.Exit(1)
+
+async def createAPI(description: str, output_dir: str, broadcast_callback: Optional[Callable] = None, 
+             use_docker: bool = False, use_nginx: bool = False) -> Dict[str, Any]:
+    """
+    Creates a new app via API.
+    """
+    try:
+        project_dir = create_output_directory(output_dir)
+        logger = setup_logging(project_dir)
+        
+        if broadcast_callback:
+            await broadcast_callback("Starting app generation...")
+        
+        # Step 1: Use Cases
+        if broadcast_callback:
+            await broadcast_callback("Generating use cases...")
+        use_case_model = generate_use_cases(description)
+        save_partial_model(project_dir, "use_cases", use_case_model)
+        
+        # Step 2: Entities
+        if broadcast_callback:
+            await broadcast_callback("Generating entities...")
+        entity_model = generate_entities(description, use_case_model)
+        save_partial_model(project_dir, "entities", entity_model)
+        
+        # Step 3: Mock Users
+        if broadcast_callback:
+            await broadcast_callback("Generating mock users...")
+        mock_user_model = generate_mock_users(description, use_case_model, entity_model)
+        save_partial_model(project_dir, "mock_users", mock_user_model)
+        
+        # Step 4: Mock Data
+        if broadcast_callback:
+            await broadcast_callback("Generating mock data...")
+        mock_data_model = generate_mock_data(description, use_case_model, entity_model, mock_user_model)
+        save_partial_model(project_dir, "mock_data", mock_data_model)
+        
+        # Step 5: Combine Models
+        if broadcast_callback:
+            await broadcast_callback("Combining models and generating interface...")
+        domain_model = combine_models(use_case_model, entity_model, mock_user_model, mock_data_model)
+        interface_model = generate_interface(domain_model)
+        
+        # Save final models
+        save_domain_model(project_dir, domain_model)
+        preview_url = save_interface_model(project_dir, interface_model, domain_model, use_docker, use_nginx)
+        
+        if broadcast_callback:
+            await broadcast_callback("App generation completed successfully!")
+        
+        return {
+            "status": "success",
+            "message": "App created successfully.",
+            "output_dir": str(project_dir),
+            "preview_url": preview_url,
+            "use_cases": use_case_model.model_dump()  # Return the generated use cases
+        }
+        
+    except Exception as e:
+        error_message = f"Error during app creation: {str(e)}"
+        if broadcast_callback:
+            await broadcast_callback(f"Error: {error_message}")
+        return {
+            "status": "error",
+            "message": error_message
+        }
+
+async def editAPI(project_dir: str, description: str, broadcast_callback: Optional[Callable] = None,
+           use_docker: bool = False, use_nginx: bool = False) -> Dict[str, Any]:
+    """
+    Edits an existing app via API.
+    """
+    try:
+        project_path = Path(project_dir)
+        logger = setup_logging(project_path)
+        
+        if broadcast_callback:
+            await broadcast_callback("Starting app edit...")
+        
+        change_data = {
+            "description": description,
+            "affected_components": [],
+            "priority": "medium"
+        }
+        
+        change_request = ChangeRequest(**change_data)
+        handler = ChangeHandler(project_path)
+        
+        if broadcast_callback:
+            await broadcast_callback("Evaluating changes...")
+        strategy = handler.evaluate_change(change_request)
+        
+        if broadcast_callback:
+            await broadcast_callback(f"Selected strategy: {strategy.strategy_type}")
+        
+        executor = StrategyExecutor(project_path, strategy, use_docker, use_nginx)
+        result = executor.execute()
+        
+        if broadcast_callback:
+            await broadcast_callback("Changes applied successfully!")
+        
+        # Assuming the use cases are generated or updated during the edit process
+        use_case_model = result.get("use_cases", None)  # Get use cases if available
+        
+        return {
+            "status": "success",
+            "message": "App edited successfully.",
+            "backup_dir": str(result["backup_dir"]),
+            "preview_url": result["preview_url"],
+            "use_cases": use_case_model.model_dump()  # Return the updated use cases
+        }
+        
+    except Exception as e:
+        error_message = f"Error during app editing: {str(e)}"
+        if broadcast_callback:
+            await broadcast_callback(f"Error: {error_message}")
+        return {
+            "status": "error",
+            "message": error_message
+        }
+
+async def revertAPI(project_dir: str, backup_dir: str, broadcast_callback: Optional[Callable] = None,
+             use_docker: bool = False, use_nginx: bool = False) -> Dict[str, Any]:
+    """
+    Reverts an app to a specific version via API.
+    """
+    try:
+        project_path = Path(project_dir)
+        backup_path = Path(backup_dir)
+        
+        if broadcast_callback:
+            await broadcast_callback("Starting revert process...")
+        
+        if not backup_path.exists():
+            raise ValueError(f"Backup directory not found: {backup_dir}")
+        
+        # Remove current project directory
+        if project_path.exists():
+            shutil.rmtree(project_path)
+        
+        # Copy backup to project directory
+        shutil.copytree(backup_path, project_path)
+        
+        if broadcast_callback:
+            await broadcast_callback("Backup restored successfully.")
+        
+        # Setup Docker if needed
+        preview_url = None
+        if use_docker:
+            if broadcast_callback:
+                await broadcast_callback("Setting up Docker deployment...")
+            from utils.output_handler import setup_docker_app
+            preview_url = setup_docker_app(project_path, project_path.name, use_nginx)
+        
+        if broadcast_callback:
+            await broadcast_callback("Revert completed successfully! App URL: " + preview_url)
+        
+        return {
+            "status": "success",
+            "message": "Reverted to the specified version.",
+            "preview_url": preview_url
+        }
+        
+    except Exception as e:
+        error_message = f"Error during revert: {str(e)}"
+        if broadcast_callback:
+            await broadcast_callback(f"Error: {error_message}")
+        return {
+            "status": "error",
+            "message": error_message
+        }
 
 if __name__ == "__main__":
     app()

@@ -2,7 +2,12 @@ import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any
-from ..models.base_models import MockDataModel, UseCaseModel, EntityModel, MockUserModel
+from models.base_models import (
+    MockDataModel, 
+    UseCaseModel, 
+    EntityModel, 
+    MockUserModel
+)
 
 load_dotenv()
 

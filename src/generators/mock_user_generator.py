@@ -2,7 +2,11 @@ import os
 from dotenv import load_dotenv
 import outlines
 from typing import Dict, Any
-from ..models.base_models import MockUserModel, UseCaseModel, EntityModel
+from models.base_models import (
+    MockUserModel, 
+    UseCaseModel, 
+    EntityModel
+)
 
 load_dotenv()
 
@@ -62,7 +66,7 @@ def generate_mock_users(
     6. Realistic test data that covers various use cases
     7. We are using supabase so the users table is already created in the auth schema. 
     8. We also have the profiles(Do not create this entity) table already created with folowing columns,: id, email, full_name, created_at, updated_at(created_at and updated_at are auto generated columns, you dont need to add them in the mock data)
-  
+    9. Do not sent any other data other than mock users data
     """
     
     result = generator(prompt)

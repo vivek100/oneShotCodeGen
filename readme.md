@@ -3,7 +3,10 @@
 A command-line interface tool for generating full-stack applications with React Admin frontend and Supabase backend.
 
 ## Updates
-
+- 2025-01-27 (Docusign + Web Version):
+    - Added Docusign integration
+    - Added Web Version hosted on Vercel with code here: https://github.com/vivek100/webversion1
+    - Added Vercel Functions for backend for openai calls and docusign integration
 - 2024-01-24 (Docker & Nginx Integration):
     - Added Docker and Nginx deployment options for both create and edit flows
     - Support for containerized deployment with optional Nginx reverse proxy
@@ -72,7 +75,19 @@ sudo systemctl enable docker
 Download and install Docker Desktop from https://www.docker.com/products/docker-desktop
 ```
 
-2. Install Nginx:
+2. Build Base Image:
+```bash
+# Navigate to the project root directory
+cd oneShotCodeGen
+
+# Build the base image
+docker build -t base-image -f base.Dockerfile .
+
+# Verify the image was created
+docker images | grep base-image
+```
+
+3. Install Nginx:
 ```bash
 # For Ubuntu
 sudo apt-get install nginx
@@ -86,13 +101,15 @@ brew install nginx
 Download and install Nginx from http://nginx.org/en/download.html
 ```
 
-3. Configure Nginx user permissions (Linux/macOS):
+4. Configure Nginx user permissions (Linux/macOS):
 ```bash
 # Add your user to nginx group
 sudo usermod -aG nginx $USER
 # Ensure nginx config directory is writable
 sudo chown -R $USER:$USER /etc/nginx/conf.d
 ```
+
+Note: The base image needs to be built only once, unless you make changes to the Dockerfile. This base image contains all the necessary dependencies and configurations that will be used as a foundation for all generated applications.
 
 ## Installation
 
