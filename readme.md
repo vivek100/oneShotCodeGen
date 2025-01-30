@@ -5,7 +5,7 @@ A command-line interface tool for generating full-stack applications with React 
 ## Updates
 - 2025-01-27 (Docusign + Web Version):
     - Added Docusign integration
-    - Added Web Version hosted on Vercel with code here: https://github.com/vivek100/webversion1
+    - Added Web Version hosted on Vercel with code here: https://github.com/vivek100/webverion1
     - Added Vercel Functions for backend for openai calls and docusign integration
 - 2024-01-24 (Docker & Nginx Integration):
     - Added Docker and Nginx deployment options for both create and edit flows
