@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+databases
+aiosqlite
+python-dotenv
+websockets
+openai
+outlines
+python-multipart
+jinja2
+supabase
+PyJWT

@@ -1,0 +1,36 @@
+# Ignore compiled files
+*.class
+
+# Ignore log files
+*.log
+
+# Ignore package files
+*.jar
+*.war
+
+# Ignore IDE directories
+.idea/
+.vscode/
+
+# ignore env files
+*.env
+
+# Ignore node modules
+node_modules/ 
+
+# virtual environment
+myenv/
+
+# build output
+dist/
+build/
+
+# ignore pycache
+__pycache__/
+
+# ignore pycache
+__pycache__/
+
+# ignore migration and seed files
+migrations/
+seeds/

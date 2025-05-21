@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenAI JSON Schema Validator & Auto-Fixer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #editors {
+      flex: 1;
+      display: flex;
+    }
+    #editor, #fixedEditor {
+      width: 50%;
+      height: 100%;
+      border-right: 1px solid #ccc;
+    }
+    #controls {
+      padding: 10px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      gap: 10px;
+    }
+    #errors, #history {
+      padding: 10px;
+      overflow-y: auto;
+      height: 200px;
+      border-top: 1px solid #ccc;
+    }
+    #errors {
+      background: #ffecec;
+      color: #cc0000;
+    }
+    #history {
+      background: #f0f0f0;
+    }
+    .history-item {
+      margin-bottom: 10px;
+      padding: 5px;
+      border-bottom: 1px dashed #aaa;
+    }
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.0/min/vs/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/json-to-ast@2.1.0/build.js"></script>
+
+</head>
+<body>
+  <div id="controls">
+    <button id="validateBtn">Validate + AutoFix</button>
+    <button id="copyBtn">Copy Fixed Schema</button>
+    <button id="downloadBtn">Download Fixed Schema</button>
+    <button id="clearBtn">Clear History</button>
+  </div>
+  <div id="editors">
+    <div id="editor"></div>
+    <div id="fixedEditor"></div>
+  </div>
+  <div id="errors"></div>
+  <div id="history">
+    <h3>History</h3>
+  </div>
+  <script>
+    // Wait for DOM and scripts to load
+    document.addEventListener('DOMContentLoaded', function () {
+
+      let editor, fixedEditor;
+      const history = [];
+      let lastFixedSchema = "";
+
+      // Initialize Monaco Editor
+      require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+          value: '{\n\t"type": "object",\n\t"properties": {}\n}',
+          language: 'json',
+          theme: 'vs-dark',
+          automaticLayout: true,
+        });
+        fixedEditor = monaco.editor.create(document.getElementById('fixedEditor'), {
+          value: '',
+          language: 'json',
+          theme: 'vs-dark',
+          automaticLayout: true,
+          readOnly: true,
+        });
+      });
+
+      function validateSchema(schemaText) {
+        let errors = [];
+        let parsedSchema;
+
+        try {
+            
+          parsedSchema = JSON.parse(schemaText);
+
+          if (parsedSchema.type !== "object") {
+            errors.push({ message: "Root schema must be of type 'object'.", line: 1 });
+          }
+
+          function walk(obj, path, lineMap, depth) {
+            // Only count depth when encountering a real "object"
+            if (obj.type === "object") {
+                if (depth > 5) {
+                errors.push({ message: `Schema exceeds maximum object nesting depth of 5 at ${path}`, line: pathLineMap[path] || 1 });
+                }
+
+                if (obj.properties) {
+                if (obj.additionalProperties !== false) {
+                    errors.push({ message: `Missing 'additionalProperties: false' at ${path}`, line: pathLineMap[path] || 1 });
+                }
+                const keys = Object.keys(obj.properties);
+                if (keys.length > 0) {
+                    if (!obj.required || !Array.isArray(obj.required)) {
+                    errors.push({ message: `Missing 'required' array at ${path}`, line: pathLineMap[path] || 1 });
+                    } else {
+                    const missing = keys.filter(k => !obj.required.includes(k));
+                    if (missing.length > 0) {
+                        errors.push({ message: `Missing required fields [${missing.join(", ")}] at ${path}`, line: pathLineMap[path] || 1 });
+                    }
+                    }
+                }
+                for (const key in obj.properties) {
+                    walk(obj.properties[key], `${path}.${key}`, lineMap, depth + 1); // Increase depth only here
+                }
+                }
+            } 
+            else if (obj.type === "array" && obj.items) {
+                // If array items are objects, increase depth
+                if (obj.items.type === "object") {
+                walk(obj.items, `${path}[]`, lineMap, depth + 1);
+                } else {
+                // If not object inside array, do not increase depth
+                walk(obj.items, `${path}[]`, lineMap, depth);
+                }
+            }
+            }
+
+          const pathLineMap = buildPathLineMapFromText(schemaText);
+
+          walk(parsedSchema, "root", pathLineMap,0);
+
+        } catch (e) {
+          errors.push({ message: `JSON Parse Error: ${e.message}`, line: 1 });
+        }
+
+        return { errors, parsedSchema };
+      }
+
+      function buildPathLineMapFromText(schemaText) {
+        const pathLineMap = {};
+
+        const lines = schemaText.split("\n");
+
+        function findLineContaining(key) {
+            for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes(`"${key}"`)) {
+                return i + 1; // Lines are 1-indexed
+            }
+            }
+            return 1; // Fallback
+        }
+
+        function walk(obj, path) {
+            if (obj && typeof obj === "object") {
+            if (Array.isArray(obj)) {
+                obj.forEach((item, idx) => {
+                walk(item, `${path}[${idx}]`);
+                });
+            } else {
+                for (const key in obj) {
+                const childPath = `${path}.${key}`;
+                pathLineMap[childPath] = findLineContaining(key);
+                walk(obj[key], childPath);
+                }
+            }
+            }
+        }
+
+        let parsedSchema;
+        try {
+            parsedSchema = JSON.parse(schemaText);
+        } catch (e) {
+            console.error("Invalid JSON!");
+            return {};
+        }
+
+        walk(parsedSchema, "root");
+        return pathLineMap;
+        }
+
+      function buildPathLineMap(astNode, currentPath = "root", pathLineMap = {}) {
+        if (!astNode) return pathLineMap;
+
+        if (astNode.type === "Object") {
+          astNode.children.forEach(prop => {
+            const key = prop.key.value;
+            const childPath = `${currentPath}.${key}`;
+            pathLineMap[childPath] = prop.key.loc.start.line;
+            buildPathLineMap(prop.value, childPath, pathLineMap);
+          });
+        } else if (astNode.type === "Array") {
+          astNode.children.forEach((item, idx) => {
+            const childPath = `${currentPath}[${idx}]`;
+            pathLineMap[childPath] = item.loc.start.line;
+            buildPathLineMap(item, childPath, pathLineMap);
+          });
+        }
+
+        return pathLineMap;
+      }
+
+      function autoFixSchema(schema) {
+        function walk(obj) {
+          if (obj && typeof obj === "object") {
+            if (obj.type === "object") {
+              if (obj.properties && typeof obj.properties === "object") {
+                if (!("additionalProperties" in obj)) {
+                  obj.additionalProperties = false;
+                }
+                const keys = Object.keys(obj.properties);
+                if (keys.length > 0) {
+                  obj.required = keys; // Always reset required to correct property keys
+                }
+                for (const key in obj.properties) {
+                  walk(obj.properties[key]);
+                }
+              }
+            }
+            if (obj.type === "array" && obj.items) {
+              walk(obj.items);
+            }
+          }
+        }
+
+        if (schema && typeof schema === "object") {
+          if (schema.type !== "object") {
+            schema.type = "object";
+          }
+          walk(schema);
+        }
+        return schema;
+      }
+
+      function showErrors(errors) {
+        const errorsDiv = document.getElementById('errors');
+        if (errors.length === 0) {
+          errorsDiv.innerHTML = "<strong>No errors! ✅ Schema looks good!</strong>";
+          errorsDiv.style.background = "#e0ffe0";
+          errorsDiv.style.color = "#007700";
+        } else {
+          errorsDiv.innerHTML = "<strong>Errors:</strong><br>" + errors.map(e => `- Line ${e.line}: ${e.message}`).join("<br>");
+          errorsDiv.style.background = "#ffecec";
+          errorsDiv.style.color = "#cc0000";
+        }
+      }
+
+      function updateHistory(input, output) {
+        history.unshift({ input, output });
+        if (history.length > 5) {
+          history.pop();
+        }
+        const historyDiv = document.getElementById('history');
+        historyDiv.innerHTML = "<h3>History</h3>";
+        history.forEach((item, idx) => {
+          const el = document.createElement('div');
+          el.className = 'history-item';
+          el.innerHTML = `
+            <strong>Run ${idx + 1}:</strong><br>
+            <em>Input:</em><pre>${item.input}</pre>
+            <em>Output:</em><pre>${item.output ? item.output : "❌ Validation failed"}</pre>
+          `;
+          historyDiv.appendChild(el);
+        });
+      }
+
+      document.getElementById('validateBtn').addEventListener('click', () => {
+        const schemaText = editor.getValue();
+        const { errors, parsedSchema } = validateSchema(schemaText);
+        showErrors(errors);
+
+        if (parsedSchema) {
+          const fixed = autoFixSchema(JSON.parse(JSON.stringify(parsedSchema)));
+          const fixedText = JSON.stringify(fixed, null, 2);
+          lastFixedSchema = fixedText;
+          fixedEditor.setValue(fixedText);
+          updateHistory(schemaText, fixedText);
+        }
+      });
+
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        history.length = 0;
+        document.getElementById('history').innerHTML = "<h3>History</h3>";
+      });
+
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        if (lastFixedSchema) {
+          navigator.clipboard.writeText(lastFixedSchema)
+            .then(() => alert("✅ Fixed schema copied to clipboard!"))
+            .catch(() => alert("❌ Failed to copy"));
+        } else {
+          alert("No fixed schema to copy!");
+        }
+      });
+
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        if (lastFixedSchema) {
+          const blob = new Blob([lastFixedSchema], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "fixed_schema.json";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          alert("No fixed schema to download!");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
