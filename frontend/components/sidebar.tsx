@@ -349,9 +349,6 @@ export default function Sidebar() {
               <span className="text-sm font-medium">Theme</span>
               <ThemeToggle />
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <TrackingStatusBadge />
-            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3">

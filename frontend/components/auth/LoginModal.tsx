@@ -108,7 +108,7 @@ export function LoginModal({ isOpen, onClose, redirectAfterLogin = false, messag
         )}
         
         <div className="flex flex-col gap-4 mb-4">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => handleLogin('github')}
             disabled={isLoading}
@@ -127,6 +127,7 @@ export function LoginModal({ isOpen, onClose, redirectAfterLogin = false, messag
             <Mail className="h-4 w-4" />
             Continue with Google
           </Button>
+          */}
         </div>
 
         <div className="relative mb-4">
