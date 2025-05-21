@@ -54,7 +54,7 @@ This project provides an advanced AI-powered platform for automatically generati
 
    # OpenAI API Configuration
    OPENAI_API_KEY=your_openai_api_key_here
-   OPENAI_MODEL_NAME=gpt-4
+   OPENAI_MODEL_NAME=gpt-4.1-nano
 
    # Frontend Configuration (for CORS)
    FRONTEND_ORIGIN=http://localhost:3000
@@ -89,8 +89,7 @@ The backend API will be available at `http://localhost:8000`.
 
 4. Configure your environment variables in `.env.local`:
    ```
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   NEXT_PUBLIC_WS_URL=ws://localhost:8000
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
    ```
 
 5. Start the development server:
