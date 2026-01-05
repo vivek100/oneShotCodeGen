@@ -263,6 +263,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- This project uses OpenAI's API for large language model capabilities
+- This project uses OpenAI's API for large language model capabilities 
 - Inspired by the potential of AI-assisted software engineering
 - Built with a focus on modular, maintainable architecture
